@@ -88,6 +88,7 @@ class ArticleDocumentView(BaseDocumentViewSet):
                 LOOKUP_QUERY_IN,
             ],
         },
+        "country": "authors.affiliations.country.name",
     }
 
     faceted_search_fields = {
@@ -101,6 +102,11 @@ class ArticleDocumentView(BaseDocumentViewSet):
         },
         "journal": {
             "field": "publication_info.journal_title",
+            "facet": TermsFacet,
+            "enabled": True,
+        },
+        "country": {
+            "field": "authors.affiliations.country.name",
             "facet": TermsFacet,
             "enabled": True,
         },
