@@ -62,15 +62,15 @@ class ArticleDocument(Document):
         }
     )
 
-    authors = fields.NestedField(
+    authors = fields.ObjectField(
         properties={
             "first_name": fields.TextField(),
             "last_name": fields.TextField(),
-            "affiliations": fields.NestedField(
+            "affiliations": fields.ObjectField(
                 properties={
                     "value": fields.TextField(),
                     "organization": fields.TextField(),
-                    "country": fields.NestedField(
+                    "country": fields.ObjectField(
                         properties={
                             "code": fields.TextField(),
                             "name": fields.KeywordField(),

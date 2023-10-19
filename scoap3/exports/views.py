@@ -1,29 +1,32 @@
-from django.http import HttpResponse
-from django.shortcuts import render
-from django.contrib import messages
 import csv
 import datetime
+
+from django.contrib import messages
+from django.http import HttpResponse
+from django.shortcuts import render
 
 from scoap3.utils.tools import affiliation_export, author_export
 
 from .forms import AffiliationExportForm, AuthorExportForm
 
+
 def generate_csv_response(data, action_name, write_header=True):
     response = HttpResponse(
         content_type="text/csv",
         headers={
-            "Content-Disposition": \
-                f'attachment; filename="scoap3_{action_name}_{datetime.datetime.now()}.csv"'},
+            "Content-Disposition": f'attachment; filename="scoap3_{action_name}_{datetime.datetime.now()}.csv"'
+        },
     )
 
     writer = csv.writer(response)
     if write_header:
-        writer.writerow(data.get('header'))
+        writer.writerow(data.get("header"))
     print(data)
-    for row in data.get('data', []):
+    for row in data.get("data", []):
         writer.writerow(row)
 
     return response
+
 
 def get_exports(request):
     action_name = None
@@ -41,18 +44,22 @@ def get_exports(request):
     if action_name and request.method == "POST":
         try:
             if "affiliation_export" in request.POST and affiliation_form.is_valid():
-                year= affiliation_form.data.get('year')
-                country= affiliation_form.data.get('country_code')
+                year = affiliation_form.data.get("year")
+                country = affiliation_form.data.get("country_code")
                 result = affiliation_export(year or None, country or None)
             if "author_export" in request.POST and author_form.is_valid():
-                year= author_form.data.get('year')
-                country= author_form.data.get('country_code')
+                year = author_form.data.get("year")
+                country = author_form.data.get("country_code")
                 result = author_export(year or None, country or None)
 
             response = generate_csv_response(result, action_name)
 
             return response
         except Exception as ex:
-            messages.error(request, f'There was an error: {ex}')
+            messages.error(request, f"There was an error: {ex}")
 
-    return render(request, "admin/tools.html", {"affiliation_form": affiliation_form, "author_form": author_form})
+    return render(
+        request,
+        "admin/tools.html",
+        {"affiliation_form": affiliation_form, "author_form": author_form},
+    )
