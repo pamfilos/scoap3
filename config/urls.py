@@ -6,13 +6,14 @@ from django.views import defaults as default_views
 from django.views.generic import TemplateView
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from rest_framework.authtoken.views import obtain_auth_token
-
+from scoap3.exports.views import get_exports
 urlpatterns = [
     path("", TemplateView.as_view(template_name="pages/home.html"), name="home"),
     path(
         "about/", TemplateView.as_view(template_name="pages/about.html"), name="about"
     ),
     # Django Admin, use {% url 'admin:index' %}
+    path(settings.ADMIN_URL+"tools/", get_exports, name="admin_tools"),
     path(settings.ADMIN_URL, admin.site.urls),
     # User management
     path("users/", include("scoap3.users.urls", namespace="users")),
