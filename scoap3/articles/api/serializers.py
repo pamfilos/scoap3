@@ -12,6 +12,7 @@ from scoap3.articles.models import (
 )
 from scoap3.misc.api.serializers import (
     ArticleArxivCategorySerializer,
+    CopyrightSerializer,
     PublicationInfoSerializer,
 )
 
@@ -33,6 +34,7 @@ class ArticleSerializer(serializers.ModelSerializer):
     article_identifiers = ArticleIdentifierSerializer(many=True, read_only=True)
     article_arxiv_category = ArticleArxivCategorySerializer(many=True, read_only=True)
     publication_info = PublicationInfoSerializer(many=True, read_only=True)
+    copyright = CopyrightSerializer(many=True, read_only=True)
 
     class Meta:
         model = Article

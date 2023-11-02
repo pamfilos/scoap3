@@ -54,18 +54,28 @@ class ArticleDocument(Document):
         properties={
             "journal_volume": fields.TextField(),
             "journal_title": fields.KeywordField(),
+            "journal_issue": fields.TextField(),
             "page_start": fields.TextField(),
             "page_end": fields.TextField(),
             "artid": fields.TextField(),
             "volume_year": fields.TextField(),
             "journal_issue_date": fields.DateField(),
+            "publisher": fields.KeywordField(),
+        }
+    )
+
+    copyright = fields.ObjectField(
+        properties={
+            "statement": fields.TextField(),
+            "year": fields.TextField(),
+            "holder": fields.TextField(),
         }
     )
 
     authors = fields.ObjectField(
         properties={
-            "first_name": fields.TextField(),
-            "last_name": fields.TextField(),
+            "first_name": fields.KeywordField(),
+            "last_name": fields.KeywordField(),
             "affiliations": fields.ObjectField(
                 properties={
                     "value": fields.TextField(),
@@ -101,8 +111,8 @@ class ArticleDocument(Document):
                 serialized_affiliations.append(serialized_affiliation)
 
             serialized_author = {
-                "first_name": author.first_name,
-                "last_name": author.last_name,
+                "first_name": author.first_name.strip(),
+                "last_name": author.last_name.strip(),
                 "affiliations": serialized_affiliations,
             }
             serialized_authors.append(serialized_author)
@@ -148,12 +158,14 @@ class ArticleDocument(Document):
         for publication_info in publication_infos:
             serialized_publication_info = {
                 "journal_volume": publication_info.journal_volume,
+                "journal_issue": publication_info.journal_issue,
                 "journal_title": publication_info.journal_title,
                 "page_start": publication_info.page_start,
                 "page_end": publication_info.page_end,
                 "artid": publication_info.artid,
                 "volume_year": publication_info.volume_year,
                 "journal_issue_date": publication_info.journal_issue_date,
+                "publisher": publication_info.publisher.name,
             }
             serialized_publication_infos.append(serialized_publication_info)
         return serialized_publication_infos

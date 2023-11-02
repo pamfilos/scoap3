@@ -36,13 +36,20 @@ class InstitutionIdentifierSerializer(serializers.ModelSerializer):
 class PublisherSerializer(serializers.ModelSerializer):
     class Meta:
         model = Publisher
-        fields = "__all__"
+        fields = [
+            "name",
+        ]
 
 
 class PublicationInfoSerializer(serializers.ModelSerializer):
+    publisher = serializers.SerializerMethodField()
+
     class Meta:
         model = PublicationInfo
         fields = "__all__"
+
+    def get_publisher(self, obj):
+        return obj.publisher.name
 
 
 class LicenseSerializer(serializers.ModelSerializer):
@@ -54,7 +61,7 @@ class LicenseSerializer(serializers.ModelSerializer):
 class CopyrightSerializer(serializers.ModelSerializer):
     class Meta:
         model = Copyright
-        fields = "__all__"
+        fields = ["statement", "holder", "year"]
 
 
 class ArticleArxivCategorySerializer(serializers.ModelSerializer):

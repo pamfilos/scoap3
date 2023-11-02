@@ -72,7 +72,7 @@ class ArticleDocumentView(BaseDocumentViewSet):
     permission_classes = [IsAuthenticatedOrReadOnly]
     pagination_class = OSStandardResultsSetPagination
 
-    search_fields = ("title", "id")
+    search_fields = ("title", "id", "authors.first_name", "authors.last_name")
 
     filter_fields = {
         "publication_year": {
@@ -89,6 +89,8 @@ class ArticleDocumentView(BaseDocumentViewSet):
             ],
         },
         "country": "authors.affiliations.country.name",
+        "first_name": "authors.first_name",
+        "last_name": "authors.last_name",
     }
 
     faceted_search_fields = {

@@ -91,7 +91,9 @@ class License(models.Model):
 
 
 class Copyright(models.Model):
-    article_id = models.ForeignKey("articles.Article", on_delete=models.CASCADE)
+    article_id = models.ForeignKey(
+        "articles.Article", on_delete=models.CASCADE, related_name="copyright"
+    )
     statement = models.CharField(max_length=255, blank=True, default="")
     holder = models.CharField(max_length=255, blank=True, default="")
     year = models.PositiveIntegerField(blank=True, null=True)

@@ -18,8 +18,7 @@ class Author(models.Model):
 
 class AuthorIdentifier(models.Model):
     author_id = models.ForeignKey(
-        "authors.Author",
-        on_delete=models.CASCADE,
+        "authors.Author", on_delete=models.CASCADE, related_name="identifiers"
     )
     identifier_type = models.CharField(
         max_length=255,
