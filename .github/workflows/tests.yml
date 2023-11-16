@@ -22,6 +22,15 @@ jobs:
       dockerfile: ./compose/production/django/Dockerfile
     secrets: inherit
 
+  build-ui:
+    uses: ./.github/workflows/build.yml
+    with:
+      ref: ${{ inputs.ref }}
+      image: cern-sis/scoap3/scoap3-backend-ui
+      context: .
+      dockerfile: ./compose/production/ui/Dockerfile
+    secrets: inherit
+
   test-backend:
     needs: build-backend
     strategy:
