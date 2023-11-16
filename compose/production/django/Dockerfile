@@ -1,6 +1,7 @@
-FROM node:18-bullseye-slim as client-builder
+FROM node:18 as client-builder
 
 ARG APP_HOME=/app
+ARG APP_UI=/ui
 WORKDIR ${APP_HOME}
 COPY ./package.json ${APP_HOME}
 RUN npm install && npm cache clean --force
@@ -12,10 +13,17 @@ ARG DJANGO_AWS_S3_CUSTOM_DOMAIN
 ENV DJANGO_AWS_S3_CUSTOM_DOMAIN=${DJANGO_AWS_S3_CUSTOM_DOMAIN}
 RUN npm run build
 
+WORKDIR ${APP_UI}
+COPY ./ui/package.json ${APP_UI}
+RUN yarn install
+COPY ./ui ${APP_UI}
+
+RUN yarn build
 
 FROM python:3.11.3-slim-bullseye
 
 ARG APP_HOME=/app
+ARG APP_UI=/ui
 WORKDIR ${APP_HOME}
 
 ARG BUILD_ENVIRONMENT=production
@@ -46,3 +54,5 @@ RUN poetry install
 
 
 COPY --from=client-builder  ${APP_HOME} ${APP_HOME}
+
+COPY --from=client-builder  ${APP_UI}/ ${APP_UI}/
