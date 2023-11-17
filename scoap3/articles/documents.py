@@ -172,7 +172,11 @@ class ArticleDocument(Document):
 
     class Index:
         name = settings.OPENSEARCH_INDEX_NAMES[__name__]
-        settings = {"number_of_shards": 1, "number_of_replicas": 1}
+        settings = {
+            "number_of_shards": 1,
+            "number_of_replicas": 1,
+            "max_result_window": 70000,
+        }
 
     class Django:
         model = Article
