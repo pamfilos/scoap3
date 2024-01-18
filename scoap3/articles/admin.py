@@ -1,4 +1,7 @@
+import csv
+
 from django.contrib import admin, messages
+from django.http import HttpResponse
 
 from scoap3.articles.models import (
     Article,
@@ -61,6 +64,8 @@ class ComplianceReportAdmin(admin.ModelAdmin):
         "check_doi_registration_time_description",
     ]
 
+    actions = ["export_as_csv"]
+
     @admin.display(description="ID")
     def article_id(self, obj):
         return obj.article.id
@@ -83,6 +88,42 @@ class ComplianceReportAdmin(admin.ModelAdmin):
     @admin.display(description="Journal")
     def article_journal(self, obj):
         return [info.journal_title for info in obj.article.publication_info.all()]
+
+    @admin.action(description="Export Selected Articles as CSV")
+    def export_as_csv(self, request, queryset):
+        meta = self.model._meta
+        base_url = f"{request.scheme}://{request.get_host()}/records"
+        field_names_mapping = {
+            "DOI": "article_doi",
+            "Journal": "article_journal",
+            "Check License": "check_license",
+            "Check File Formats": "check_file_formats",
+            "Check Arxiv Category": "check_arxiv_category",
+            "Check Article Type": "check_article_type",
+        }
+
+        response = HttpResponse(content_type="text/csv")
+        response["Content-Disposition"] = f"attachment; filename={meta}.csv"
+        writer = csv.writer(response)
+        field_names = list(field_names_mapping.keys())
+        rows_titles = ["Link to Article"] + field_names
+        writer.writerow(rows_titles)
+
+        for obj in queryset:
+            article_doi = self.article_doi(obj)
+            article_journal = self.article_journal(obj)
+            values = [
+                getattr(obj, field_names_mapping.get(field, field), None)
+                for field in field_names
+            ]
+            values = [value for value in values if value is not None]
+            row = [
+                f"{base_url}/{article_doi[0]}",
+                article_doi[0],
+                article_journal[0],
+            ] + values
+            writer.writerow(row)
+        return response
 
 
 class ArticleComplianceReportInline(admin.StackedInline):
