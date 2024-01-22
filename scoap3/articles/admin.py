@@ -1,7 +1,10 @@
 import csv
+import datetime
 
 from django.contrib import admin, messages
 from django.http import HttpResponse
+from django.urls import reverse
+from django.utils.html import format_html
 
 from scoap3.articles.models import (
     Article,
@@ -89,9 +92,9 @@ class ComplianceReportAdmin(admin.ModelAdmin):
     def article_journal(self, obj):
         return [info.journal_title for info in obj.article.publication_info.all()]
 
-    @admin.action(description="Export Selected Articles as CSV")
+    @admin.action(description="Export as CSV")
     def export_as_csv(self, request, queryset):
-        meta = self.model._meta
+        filename = f"article_compliance_{datetime.datetime.now()}.csv"
         base_url = f"{request.scheme}://{request.get_host()}/records"
         field_names_mapping = {
             "DOI": "article_doi",
@@ -103,7 +106,7 @@ class ComplianceReportAdmin(admin.ModelAdmin):
         }
 
         response = HttpResponse(content_type="text/csv")
-        response["Content-Disposition"] = f"attachment; filename={meta}.csv"
+        response["Content-Disposition"] = f"attachment; filename={filename}"
         writer = csv.writer(response)
         field_names = list(field_names_mapping.keys())
         rows_titles = ["Link to Article"] + field_names
@@ -203,8 +206,10 @@ class ArticleAuthorsInline(admin.StackedInline):
 class ArticleAdmin(admin.ModelAdmin):
     list_display = [
         "id",
+        "preview_link",
         "title",
         "journal_title",
+        "publisher",
         "doi",
         "check_license",
         "check_file_formats",
@@ -243,6 +248,20 @@ class ArticleAdmin(admin.ModelAdmin):
             identifier.identifier_value
             for identifier in obj.article_identifiers.filter(identifier_type="DOI")
         ]
+
+    @admin.display(description="Publisher")
+    def publisher(self, obj):
+        return [info.publisher for info in obj.publication_info.all()]
+
+    @admin.display(description="Link")
+    def preview_link(self, obj):
+        url = reverse("api:article-detail", args=[obj.id])
+        web_url = url.replace("/api/", "/")
+        return format_html(
+            '<a href="{}" target="_blank">JSON</a>|<a href="{}" target="_blank">Web</a>',
+            url,
+            web_url,
+        )
 
     @admin.action(description="Run compliance checks")
     def make_compliance_check(self, request, queryset):
@@ -296,13 +315,13 @@ class ArticleAdmin(admin.ModelAdmin):
 
 class ArticleIdentifierAdmin(admin.ModelAdmin):
     list_display = ["article_id", "identifier_type", "identifier_value"]
-    search_fields = ["article_id"]
+    search_fields = ["article_id__id", "identifier_value"]
     raw_id_fields = ["article_id"]
 
 
 class ArticleFileAdmin(admin.ModelAdmin):
     list_display = ["id", "article_id", "file", "file_size", "updated", "created"]
-    search_fields = ["article_id"]
+    search_fields = ["article_id__id"]
 
     @admin.display(description="Size (bytes)")
     def file_size(self, obj):

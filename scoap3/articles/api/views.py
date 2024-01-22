@@ -101,6 +101,7 @@ class ArticleDocumentView(BaseDocumentViewSet):
     search_fields = (
         "title",
         "id",
+        "doi",
         "authors.first_name",
         "authors.last_name",
         "article_identifiers.identifier_value",
@@ -125,6 +126,7 @@ class ArticleDocumentView(BaseDocumentViewSet):
         "country": "authors.affiliations.country.name",
         "first_name": "authors.first_name",
         "last_name": "authors.last_name",
+        "doi": "doi",
     }
 
     faceted_search_fields = {
