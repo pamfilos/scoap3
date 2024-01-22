@@ -67,6 +67,18 @@ class ComplianceReportAdmin(admin.ModelAdmin):
         "check_doi_registration_time_description",
     ]
 
+    list_filter = [
+        "report_date",
+        "article_id___updated_at",
+        "article_id___created_at",
+        "article_id__publication_info__journal_title",
+        "article_id__report__check_license",
+        "article_id__report__check_file_formats",
+        "article_id__report__check_arxiv_category",
+        "article_id__report__check_article_type",
+        "article_id__report__check_doi_registration_time",
+    ]
+
     actions = ["export_as_csv"]
 
     @admin.display(description="ID")
