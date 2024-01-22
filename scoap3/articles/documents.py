@@ -48,6 +48,7 @@ class ArticleDocument(Document):
         }
     )
 
+    doi = fields.KeywordField()
     article_arxiv_category = fields.NestedField(
         properties={
             "category": fields.TextField(),
@@ -131,6 +132,12 @@ class ArticleDocument(Document):
             }
             serialized_article_identifiers.append(serialized_article_identifier)
         return serialized_article_identifiers
+
+    def prepare_doi(self, instance):
+        article_identifiers = ArticleIdentifier.objects.filter(
+            article_id=instance, identifier_type="DOI"
+        )
+        return article_identifiers[0].identifier_value if article_identifiers else None
 
     def prepare_related_files(self, instance):
         article_files = ArticleFile.objects.filter(article_id=instance)
