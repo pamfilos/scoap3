@@ -24,7 +24,7 @@ class Affiliation(models.Model):
         ordering = ["id"]
 
     def __str__(self) -> str:
-        return f"{self.value} ({self.organization}) - {self.country.name}"
+        return f"{self.value} ({self.organization}) - {self.country.name if self.country else '-'}"
 
 
 class InstitutionIdentifierType(models.TextChoices):
