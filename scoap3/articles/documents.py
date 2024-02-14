@@ -72,21 +72,23 @@ class ArticleDocument(Document):
 
     copyright = fields.ObjectField(
         properties={
-            "statement": fields.TextField(),
+            "statement": fields.KeywordField(),
             "year": fields.TextField(),
             "holder": fields.TextField(),
         }
     )
 
+    countries = fields.KeywordField()
+
     authors = fields.ObjectField(
         properties={
             "first_name": fields.KeywordField(),
             "last_name": fields.KeywordField(),
-            "affiliations": fields.NestedField(
+            "affiliations": fields.ObjectField(
                 properties={
                     "value": fields.TextField(),
                     "organization": fields.TextField(),
-                    "country": fields.NestedField(
+                    "country": fields.ObjectField(
                         properties={
                             "code": fields.TextField(),
                             "name": fields.KeywordField(),
@@ -97,6 +99,24 @@ class ArticleDocument(Document):
         }
     )
 
+    def prepare_countries(self, instance):
+        authors = Author.objects.filter(article_id=instance)
+        countries = set()
+        for author in authors:
+            affiliations = Affiliation.objects.filter(author_id=author)
+            for affiliation in affiliations:
+                if affiliation.country:
+                    country = {
+                        "code": affiliation.country.code,
+                        "name": affiliation.country.name,
+                    }
+                else:
+                    country = {"code": "-", "name": "-"}
+
+                countries.add(country.get("code"))
+
+        return list(countries)
+
     def prepare_authors(self, instance):
         authors = Author.objects.filter(article_id=instance)
         serialized_authors = []
@@ -104,13 +124,18 @@ class ArticleDocument(Document):
             affiliations = Affiliation.objects.filter(author_id=author)
             serialized_affiliations = []
             for affiliation in affiliations:
+                if affiliation.country:
+                    country = {
+                        "code": affiliation.country.code,
+                        "name": affiliation.country.name,
+                    }
+                else:
+                    country = {"code": "-", "name": "-"}
+
                 serialized_affiliation = {
                     "value": affiliation.value,
                     "organization": affiliation.organization,
-                    "country": {
-                        "code": affiliation.country.code,
-                        "name": affiliation.country.name,
-                    },
+                    "country": country,
                 }
                 serialized_affiliations.append(serialized_affiliation)
 

@@ -33,11 +33,7 @@ def affiliation_export(search_year, search_country):
         search = search.filter("match", publication_date=f"{search_year}-01-01||/y")
 
     if search_country:
-        search = search.filter(
-            "nested",
-            path="authors.affiliations.country",
-            query=Q("match", authors__affiliations__country__code=search_country),
-        )
+        search = search.filter("term", countries=search_country)
 
     for article in search.scan():
         year = article.publication_date.year
@@ -113,11 +109,7 @@ def author_export(search_year, search_country):
         search = search.filter("match", publication_date=f"{search_year}-01-01||/y")
 
     if search_country:
-        search = search.filter(
-            "nested",
-            path="authors.affiliations.country",
-            query=Q("match", authors__affiliations__country__code=search_country),
-        )
+        search = search.filter("term", countries=search_country)
 
     for article in search.scan():
         year = article.publication_date.year
