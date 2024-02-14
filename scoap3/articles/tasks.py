@@ -162,3 +162,22 @@ def compliance_checks(article_id):
     report.save()
     logger.info("Compliance checks completed for article %s", article_id)
     return f"Compliance checks completed for article {article_id}"
+
+
+from django.core.paginator import Paginator
+from scoap3.articles.models import Article
+from django_opensearch_dsl.registries import registry
+
+@shared_task
+def index_article_batch(article_ids):
+    articles = Article.objects.filter(id__in=article_ids)
+    for article in articles:
+        registry.update(article)
+
+def index_all_articles(batch_size=100):
+    all_articles = Article.objects.all().values_list('id', flat=True)
+    paginator = Paginator(all_articles, batch_size)
+
+    for page_number in paginator.page_range:
+        page = paginator.page(page_number)
+        index_article_batch.delay(list(page.object_list))
