@@ -6,6 +6,6 @@
 
 {% block content %}
     {% url 'api:article-detail' original.id as article_api_url %}
-    <a href="{{article_api_url|replace_substring:'/api/,/'}}" class="button">View in Repository</a>
+    <a href="{{article_api_url|replace_substring:'/api/articles,/records'}}" class="button">View in Repository</a>
     {{ block.super }}
 {% endblock %}

@@ -268,7 +268,7 @@ class ArticleAdmin(admin.ModelAdmin):
     @admin.display(description="Link")
     def preview_link(self, obj):
         url = reverse("api:article-detail", args=[obj.id])
-        web_url = url.replace("/api/", "/")
+        web_url = url.replace("/api/articles", "/records")
         return format_html(
             '<a href="{}" target="_blank">JSON</a>|<a href="{}" target="_blank">Web</a>',
             url,
