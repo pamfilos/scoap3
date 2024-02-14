@@ -77,11 +77,11 @@ def _create_article(data, licenses):
         "subtitle": data["titles"][0].get("subtitle", ""),
         "abstract": data["abstracts"][0].get("value", ""),
     }
-    if Article.objects.filter(pk=article_data["id"]).exists():
+    if article_data.get("id") and Article.objects.filter(pk=article_data["id"]).exists():
         article = Article.objects.get(pk=article_data["id"])
         article.__dict__.update(**article_data)
     else:
-        article, _ = Article.objects.get_or_create(**article_data)
+        article = Article.objects.create(**article_data)
         article._created_at = data.get("_created") or data.get("record_creation_date")
 
     article.related_licenses.set(licenses)
