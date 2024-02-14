@@ -1,8 +1,6 @@
 import logging
 from collections import Counter
 
-from opensearchpy import Q
-
 from scoap3.articles.documents import ArticleDocument
 from scoap3.articles.util import (
     get_arxiv_primary_category,

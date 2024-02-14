@@ -2,6 +2,8 @@ import logging
 from datetime import datetime
 
 from celery import shared_task
+from django.core.paginator import Paginator
+from django_opensearch_dsl.registries import registry
 
 from scoap3.articles.models import Article, ComplianceReport
 from scoap3.misc.utils import fetch_doi_registration_date
@@ -164,18 +166,15 @@ def compliance_checks(article_id):
     return f"Compliance checks completed for article {article_id}"
 
 
-from django.core.paginator import Paginator
-from scoap3.articles.models import Article
-from django_opensearch_dsl.registries import registry
-
 @shared_task
 def index_article_batch(article_ids):
     articles = Article.objects.filter(id__in=article_ids)
     for article in articles:
         registry.update(article)
 
+
 def index_all_articles(batch_size=100):
-    all_articles = Article.objects.all().values_list('id', flat=True)
+    all_articles = Article.objects.all().values_list("id", flat=True)
     paginator = Paginator(all_articles, batch_size)
 
     for page_number in paginator.page_range:
