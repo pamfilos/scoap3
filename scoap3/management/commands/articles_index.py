@@ -1,6 +1,3 @@
-import math
-
-from django.core.files.storage import storages
 from django.core.management.base import BaseCommand, CommandParser
 
 from scoap3.articles.tasks import index_all_articles
@@ -27,4 +24,4 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
-        index_all_articles(options['batch_size'])
+        index_all_articles(options["batch_size"])
