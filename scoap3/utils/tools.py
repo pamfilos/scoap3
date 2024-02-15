@@ -1,7 +1,11 @@
 import logging
 from collections import Counter
 
+from django.db import connection
+from django.db.models import Max
+
 from scoap3.articles.documents import ArticleDocument
+from scoap3.articles.models import Article
 from scoap3.articles.util import (
     get_arxiv_primary_category,
     get_first_arxiv,
@@ -156,3 +160,23 @@ def author_export(search_year, search_country):
                 )
             )
     return {"header": result_headers, "data": result_data}
+
+
+def update_article_db_model_sequence(new_start_sequence):
+    max_id = Article.objects.aggregate(max_id=Max("id"))["max_id"] or 0
+    if new_start_sequence <= max_id:
+        print(
+            f"New sequence start ({new_start_sequence}) must be higher than current max ID ({max_id})."
+        )
+        return False
+
+    app_label = Article._meta.app_label
+    model_name = Article._meta.model_name
+
+    with connection.cursor() as cursor:
+        command = f"ALTER SEQUENCE {app_label}_{model_name}_id_seq RESTART WITH {new_start_sequence};"
+        cursor.execute(command)
+    print(
+        f"Sequence for {app_label}_{model_name} updated to start with {new_start_sequence}."
+    )
+    return True
