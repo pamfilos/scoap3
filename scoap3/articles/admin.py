@@ -77,6 +77,7 @@ class ComplianceReportAdmin(admin.ModelAdmin):
         "article_id___updated_at",
         "article_id___created_at",
         "article_id__publication_info__journal_title",
+        "article_id__publication_date",
         "article_id__report__check_license",
         "article_id__report__check_file_formats",
         "article_id__report__check_arxiv_category",
@@ -254,6 +255,7 @@ class ArticleAdmin(admin.ModelAdmin):
     list_filter = [
         "_updated_at",
         "_created_at",
+        "publication_date",
         "publication_info__journal_title",
         "report__check_license",
         "report__check_file_formats",
