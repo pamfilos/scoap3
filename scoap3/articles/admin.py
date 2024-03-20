@@ -372,3 +372,7 @@ admin.site.register(Article, ArticleAdmin)
 admin.site.register(ArticleIdentifier, ArticleIdentifierAdmin)
 admin.site.register(ArticleFile, ArticleFileAdmin)
 admin.site.register(ComplianceReport, ComplianceReportAdmin)
+
+# Disable Delete action from all admin sites
+# This can be overriden specifically from each ModelAdmin class
+admin.site.disable_action("delete_selected")
