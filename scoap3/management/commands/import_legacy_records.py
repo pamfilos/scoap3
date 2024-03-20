@@ -44,20 +44,20 @@ class Command(BaseCommand):
             "--username",
             type=str,
             required=False,
-            help="Username for Elasticsearch. Uses OPENSEARCH_USER if empty.",
+            help="Username for Elasticsearch. Uses LEGACY_OPENSEARCH_USER if empty.",
         )
         parser.add_argument(
             "--password",
             type=str,
             required=False,
-            help="Password for Elasticsearch. Uses OPENSEARCH_PASSWORD if empty.",
+            help="Password for Elasticsearch. Uses LEGACY_OPENSEARCH_PASSWORD if empty.",
         )
 
     def handle(self, *args, **options):
         if not options["username"]:
-            options["username"] = env("OPENSEARCH_USER")
+            options["username"] = env("LEGACY_OPENSEARCH_USER")
         if not options["password"]:
-            options["password"] = env("OPENSEARCH_PASSWORD")
+            options["password"] = env("LEGACY_OPENSEARCH_PASSWORD")
 
         timestamp = round(time.time() * 1000)
         es_settings = [
