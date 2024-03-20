@@ -122,6 +122,7 @@ class ComplianceReportAdmin(admin.ModelAdmin):
             "Check File Formats": "check_file_formats",
             "Check Arxiv Category": "check_arxiv_category",
             "Check Article Type": "check_article_type",
+            "Check DOI Registration": "check_doi_registration_time_description",
         }
 
         response = HttpResponse(content_type="text/csv")
