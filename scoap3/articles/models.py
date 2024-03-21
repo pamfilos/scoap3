@@ -118,7 +118,9 @@ class ComplianceReport(models.Model):
         ]
         pub_info = self.article.publication_info.all()
         _check_arxiv_category = True
-        if len(pub_info) and not (pub_info[0].journal_title in JOURNALS_SKIP_COMPLIANCE):
+        if len(pub_info) and not (
+            pub_info[0].journal_title in JOURNALS_SKIP_COMPLIANCE
+        ):
             _check_arxiv_category = self.check_arxiv_category
 
         return all(

@@ -56,6 +56,7 @@ class ExportAsCSVTest(TestCase):
                 "Check File Formats",
                 "Check Arxiv Category",
                 "Check Article Type",
+                "Check DOI Registration",
             ],
         )
         self.assertEqual(
@@ -68,5 +69,6 @@ class ExportAsCSVTest(TestCase):
                 "False",
                 "False",
                 "False",
+                "",
             ],
         )
