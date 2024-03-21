@@ -128,6 +128,5 @@ class ComplianceReport(models.Model):
                 _check_arxiv_category,
                 self.check_article_type,
                 self.check_doi_registration_time,
-                self.check_authors_affiliation,
             ]
         )
