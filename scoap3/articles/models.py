@@ -108,11 +108,24 @@ class ComplianceReport(models.Model):
         return f"Compliance Report for {self.article.title} on {self.report_date.strftime('%Y-%m-%d')}"
 
     def is_compliant(self):
+        # If article is part of the following jouranls list, we
+        # should not take into account the ARXIV category compliance
+        JOURNALS_SKIP_COMPLIANCE = [
+            "Physics Letters B",
+            "Nuclear Physics B",
+            "Journal of High Energy Physics",
+            "European Physical Journal C",
+        ]
+        pub_info = self.article.publication_info.all()
+        _check_arxiv_category = True
+        if len(pub_info) and not (pub_info[0].journal_title in JOURNALS_SKIP_COMPLIANCE):
+            _check_arxiv_category = self.check_arxiv_category
+
         return all(
             [
                 self.check_license,
                 self.check_file_formats,
-                self.check_arxiv_category,
+                _check_arxiv_category,
                 self.check_article_type,
                 self.check_doi_registration_time,
                 self.check_authors_affiliation,
