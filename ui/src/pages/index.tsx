@@ -69,7 +69,8 @@ const HomePage: React.FC<HomePageProps> = ({ count, facets }) => {
 
 export const getServerSideProps: GetServerSideProps = async () => {
   const query = { search: "" };
-  const res = await fetch(`${getApiUrl() + getSearchUrl(query)}`, authToken);
+  const url = `${getApiUrl() + getSearchUrl(query)}`;
+  const res = await fetch(url, authToken);
   const { count, facets } = (await res?.json()) as Response;
   const countValue = { count: count || 0 };
   const facetsValue = { facets: facets || null };

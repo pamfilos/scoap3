@@ -1,6 +1,6 @@
 import ReactHtmlParser from "react-html-parser";
 
-import { ArticleIdentifier, Params, QueryType, queryTypes } from "@/types";
+import { ArticleIdentifier, Params } from "@/types";
 import { PARTNER_COUNTRIES } from "./data";
 import { Token } from "../../token";
 
@@ -16,34 +16,25 @@ export const authToken = Token
     }
   : {};
 
-const defaultQueryValues = {
-  page: 1,
-  page_size: 20,
-};
-
-const isValue = (value: any): boolean =>
-  value !== undefined && value !== null && value !== "";
-
 const buildSearchParams = (q: Params): string => {
-  const query = { ...defaultQueryValues, ...q };
+  const searchParams = new URLSearchParams();
 
-  const values = Object.entries(query).flatMap(([key, value]) => {
-    if (queryTypes.includes(key as QueryType)) {
-      if (Array.isArray(value)) {
-        return value.filter(isValue).map((v) => `${key}=${v}`);
-      } else if (isValue(value)) {
-        return [`${key}=${value}`];
-      }
+  Object.entries(q).forEach(([key, value]) => {
+    if (Array.isArray(value)) {
+      value.forEach(item => searchParams.append(key, item));
+    } else {
+      searchParams.set(key, `${value}`);
     }
-    return [];
   });
 
-  return values.join("&");
-};
+  return searchParams.toString();
+}
 
 const getSearchUrl = (query: Params, local?: boolean) => {
   const searchParams = buildSearchParams(query);
-  const url = local ? `/search?${searchParams}` : `?${searchParams}`;
+  const path = local ? "/search" : "";
+  const params = searchParams ? `?${searchParams}` : "";
+  const url = `${path}${params}`;
 
   return url;
 };

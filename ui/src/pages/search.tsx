@@ -7,6 +7,7 @@ import SearchResults from "@/components/search/SearchResults";
 import YearFacet from "@/components/search/YearFacet";
 import { authToken, getApiUrl, getSearchUrl } from "@/utils/utils";
 import CheckboxFacet from "@/components/search/CheckboxFacet";
+import { encode } from 'querystring'
 
 interface SearchPageProps {
   results: Result[];
@@ -40,7 +41,6 @@ const SearchPage: React.FC<SearchPageProps> = ({
                     data={countries}
                     title="Country / Region / Territory"
                     type={"country"}
-                    params={query}
                   />
                 )}
 
@@ -49,7 +49,6 @@ const SearchPage: React.FC<SearchPageProps> = ({
                     data={journals}
                     title="Journal"
                     type={"journal"}
-                    params={query}
                   />
                 )}
               </>
@@ -68,10 +67,30 @@ const SearchPage: React.FC<SearchPageProps> = ({
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const query = context?.query as unknown as Params;
 
-  const res = await fetch(getApiUrl() + getSearchUrl({ ...query }), authToken);
-  const { results, count, facets } = (await res.json()) as Response;
+  const searchParams = new URLSearchParams(encode(query))
+  const params = searchParams ? `?${searchParams}` : "";
+  const url = getApiUrl() + params
+  let results = [], count = 0 , facets =[];
 
-  return { props: { results, count, query, facets } };
+  try {
+    const res = await fetch(url, authToken);
+
+    const contentType = res.headers.get("content-type");
+    if (contentType && contentType.indexOf("application/json") !== -1) {
+      const data = await res.json();
+      results = data.results;
+      count = data.count;
+      facets = data.facets;
+    }
+  } catch (err) {
+    console.error("Error fetching or parsing data:", err);
+  }
+
+
+
+  return {
+    props: { results, count, query, facets },
+  };
 };
 
 export default SearchPage;

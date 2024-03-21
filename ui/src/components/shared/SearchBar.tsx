@@ -25,7 +25,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
     <>
       {!hide && (
         <Search
-          onSearch={() => router.push(getSearchUrl({ search: val }, true))}
+          onSearch={() => router.push(getSearchUrl({...(val ? {search: val} : {})} , true))}
           placeholder={placeholder}
           enterButton
           className={className}
