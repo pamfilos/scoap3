@@ -11,7 +11,6 @@ import { authToken, filterCountries, mapCountryNames, getApiUrl, getSearchUrl } 
 interface HomePageProps {
   count: number;
   facets: Facets;
-  query: Params;
 }
 
 const HomePage: React.FC<HomePageProps> = ({ count, facets }) => {
@@ -68,13 +67,12 @@ const HomePage: React.FC<HomePageProps> = ({ count, facets }) => {
 };
 
 export const getServerSideProps: GetServerSideProps = async () => {
-  const query = { search: "" };
-  const url = `${getApiUrl() + getSearchUrl(query)}`;
+  const url = `${getApiUrl() + getSearchUrl({})}`;
   const res = await fetch(url, authToken);
   const { count, facets } = (await res?.json()) as Response;
   const countValue = { count: count || 0 };
   const facetsValue = { facets: facets || null };
-  return { props: Object.assign(countValue, facetsValue, query) };
+  return { props: Object.assign(countValue, facetsValue) };
 };
 
 export default HomePage;
