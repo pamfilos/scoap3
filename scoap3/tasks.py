@@ -110,6 +110,14 @@ def _create_article_file(data, article):
         article_file_data = {"article_id": article, "file": file_path}
         ArticleFile.objects.get_or_create(**article_file_data)
 
+    for file in data.get("files", {}):
+        article_id = article.id
+        file_path = data["files"][file]
+        file_path = file_path.split("/", 1)[1] if "/" in file_path else file_path
+        article = Article.objects.get(pk=article_id)
+        article_file_data = {"article_id": article, "file": file_path}
+        ArticleFile.objects.get_or_create(**article_file_data)
+
 
 def _create_article_identifier(data, article):
     for doi in data.get("dois"):
