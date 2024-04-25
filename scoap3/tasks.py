@@ -6,7 +6,7 @@ import re
 
 import pycountry
 from django.core.exceptions import MultipleObjectsReturned, ValidationError
-from django.core.files.storage import storages
+from django.core.files.storage import default_storage, storages
 from django.core.validators import URLValidator
 from elasticsearch import ConnectionError, ConnectionTimeout, Elasticsearch
 from sentry_sdk import capture_exception
@@ -26,6 +26,18 @@ from scoap3.misc.models import (
 )
 
 logger = logging.getLogger(__name__)
+
+
+def get_default_storage_path():
+    if hasattr(default_storage, "bucket"):
+        bucket_name = default_storage.bucket.name
+        media_path = default_storage.location
+        return f"{bucket_name}/{media_path}"
+
+    return ""
+
+
+DEFAULT_STORAGE_PATH = get_default_storage_path()
 
 
 def _rename_keys(data, replacements):
@@ -113,7 +125,8 @@ def _create_article_file(data, article):
     for file in data.get("files", {}):
         article_id = article.id
         file_path = data["files"][file]
-        file_path = file_path.split("/", 1)[1] if "/" in file_path else file_path
+        if DEFAULT_STORAGE_PATH:
+            file_path = file_path.replace(DEFAULT_STORAGE_PATH, "")
         article = Article.objects.get(pk=article_id)
         article_file_data = {"article_id": article, "file": file_path}
         ArticleFile.objects.get_or_create(**article_file_data)
