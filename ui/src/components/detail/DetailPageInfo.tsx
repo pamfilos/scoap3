@@ -43,6 +43,13 @@ const DetailPageInfo: React.FC<DetailPageInfoProps> = ({ article }) => {
     ));
   };
 
+  const renderCopyright = () => {
+    if (article?.copyright?.[0]?.statement)
+      return article?.copyright?.[0]?.statement;
+    else
+      return article?.copyright?.[0]?.holder || "-"
+  }
+
   return (
     <dl className="m-0 pb-5">
       <dt>Published on:</dt>
@@ -58,7 +65,7 @@ const DetailPageInfo: React.FC<DetailPageInfoProps> = ({ article }) => {
       {artid && <dd>Article ID: {artid}</dd>}
       {renderIdentifierLinks(article?.article_identifiers)}
       <dt>Copyrights:</dt>
-      <dd>{article?.copyright?.[0]?.statement}</dd>
+      <dd>{renderCopyright()}</dd>
       <dt>Licence:</dt>
       <dd>{renderLicenses(article?.related_licenses)}</dd>
 
