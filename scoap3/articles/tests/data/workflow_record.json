@@ -43,6 +43,24 @@
     {
       "affiliations": [
         {
+          "country": "UK",
+          "value": "Department of Physics, Swansea University, Swansea SA2 8PP, United Kingdom"
+        }
+      ],
+      "full_name": "John Doe"
+    },
+    {
+      "affiliations": [
+        {
+          "country": null,
+          "value": "Department of Physics, Swansea University, Swansea SA2 8PP, WrongCountry"
+        }
+      ],
+      "full_name": "George Wrong"
+    },
+    {
+      "affiliations": [
+        {
           "country": "Colombia",
           "value": "Universidad Nacional de Colombia, Bogot\\u00e1, Colombia"
         }
