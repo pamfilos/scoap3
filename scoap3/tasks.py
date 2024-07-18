@@ -330,6 +330,7 @@ def import_to_scoap3(data, migrate_files):
     authors = _create_author(data, article)
     _create_author_identifier(data, authors)
     _create_affiliation(data, authors)
+    article.save()
     return article
 
 

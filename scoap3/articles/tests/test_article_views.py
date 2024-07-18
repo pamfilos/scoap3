@@ -51,6 +51,16 @@ class TestArticleViewSet:
             article.title
             == "The Effective QCD Running Coupling Constant and a Dirac Model for the Charmonium Spectrum"
         )
+        search_article_detail_url = reverse("search:article-detail", kwargs={"pk": article_id})
+
+        search_response = client.get(
+            search_article_detail_url,
+            content_type="application/json",
+        )
+        assert search_response.status_code == status.HTTP_200_OK
+        assert search_response.data["doi"] == data["dois"][0]["value"]
+        assert search_response.data["copyright"][0]["statement"] == data["copyright"][0]["statement"]
+        assert search_response.data["publication_info"][0]["publisher"] == data["imprints"][0]["publisher"]
 
         data["titles"][0]["title"] = "New title"
         response = client.post(
