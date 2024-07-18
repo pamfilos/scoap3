@@ -4,7 +4,7 @@ import logging
 import os
 import re
 
-import pycountry
+import country_converter as coco
 from django.core.exceptions import MultipleObjectsReturned, ValidationError
 from django.core.files.storage import default_storage, storages
 from django.core.validators import URLValidator
@@ -26,6 +26,7 @@ from scoap3.misc.models import (
 )
 
 logger = logging.getLogger(__name__)
+cc = coco.CountryConverter()
 
 
 def get_default_storage_path():
@@ -279,8 +280,8 @@ def _create_country(affiliation):
             }
         else:
             country_data = {
-                "code": pycountry.countries.search_fuzzy(country)[0].alpha_2,
-                "name": pycountry.countries.search_fuzzy(country)[0].name,
+                "code": cc.convert(country, to="iso2"),
+                "name": cc.convert(country, to="name_short"),
             }
         country_obj, _ = Country.objects.get_or_create(**country_data)
         logger.info("Country:%s created.", country_obj.name)
