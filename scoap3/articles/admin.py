@@ -265,6 +265,10 @@ class ArticleAdmin(admin.ModelAdmin):
         "report__check_doi_registration_time",
         "report__check_authors_affiliation",
     ]
+    readonly_fields = [
+        "_created_at",
+        "_updated_at",
+    ]
     inlines = [ArticleAuthorsInline, ArticleComplianceReportInline]
 
     @admin.display(description="Journal")
