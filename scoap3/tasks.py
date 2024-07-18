@@ -84,7 +84,6 @@ def _create_licenses(data):
 
 def _create_article(data, licenses):
     article_data = {
-        "publication_date": data["imprints"][0].get("date"),
         "title": data["titles"][0].get("title"),
         "subtitle": data["titles"][0].get("subtitle", ""),
         "abstract": data["abstracts"][0].get("value", ""),
@@ -96,6 +95,10 @@ def _create_article(data, licenses):
         doi_exists = ArticleIdentifier.objects.filter(
             identifier_type="DOI", identifier_value=data.get("dois")[0].get("value")
         ).exists()
+    publication_date = data["imprints"][0].get("date")
+
+    if publication_date:
+        article_data["publication_date"] = publication_date
 
     # if "control_number" present, means it is a legacy record
     if data.get("control_number"):
@@ -117,12 +120,14 @@ def _create_article(data, licenses):
         article = ArticleIdentifier.objects.get(
             identifier_type="DOI", identifier_value=doi_value
         ).article_id
+        if publication_date:
+            article_data["publication_date"] = publication_date
         article.__dict__.update(**article_data)
     # else create new
     else:
+        article_data["publication_date"] = publication_date
         article = Article.objects.create(**article_data)
         article._created_at = data.get("_created") or data.get("record_creation_date")
-
     article.related_licenses.set(licenses)
     article.save()
     return article

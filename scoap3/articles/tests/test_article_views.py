@@ -71,6 +71,7 @@ class TestArticleViewSet:
         client.force_login(user)
         contents = (shared_datadir / "workflow_record.json").read_text()
         data = json.loads(contents)
+
         response = client.post(
             reverse("api:article-workflow-import-list"),
             data,
@@ -137,6 +138,105 @@ class TestArticleViewSet:
         assert article.title == "New title"
         assert len(expected_dois) == 1
         assert "10.5506/APhysPolB.54.10-A3" in expected_dois
+
+    def test_create_article_from_workflow_without_publication_date(
+        self, client, user, shared_datadir
+    ):
+        client.force_login(user)
+        contents = (shared_datadir / "workflow_record.json").read_text()
+        data = json.loads(contents)
+
+        del data["imprints"][0]["date"]
+        response = client.post(
+            reverse("api:article-workflow-import-list"),
+            data,
+            content_type="application/json",
+        )
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data["publication_date"] == response.data["_created_at"]
+
+        article_id = response.data["id"]
+        article = Article.objects.get(id=article_id)
+        assert article.publication_date is None
+
+    def test_create_update_from_workflow_without_publication_date(
+        self, client, user, shared_datadir
+    ):
+        client.force_login(user)
+        contents = (shared_datadir / "workflow_record.json").read_text()
+        data = json.loads(contents)
+        response = client.post(
+            reverse("api:article-workflow-import-list"),
+            data,
+            content_type="application/json",
+        )
+        assert response.status_code == status.HTTP_200_OK
+
+        article_id_with_publication_date = response.data["id"]
+        article_with_publication_date = Article.objects.get(
+            id=article_id_with_publication_date
+        )
+        assert article_with_publication_date.publication_date is not None
+
+        del data["imprints"][0]["date"]
+        response = client.post(
+            reverse("api:article-workflow-import-list"),
+            data,
+            content_type="application/json",
+        )
+        assert response.status_code == status.HTTP_200_OK
+
+        article_id_without_publication_date = response.data["id"]
+        assert article_id_with_publication_date == article_id_without_publication_date
+        article_without_publication_date = Article.objects.get(
+            id=article_id_without_publication_date
+        )
+        assert article_without_publication_date.publication_date is not None
+
+    def test_create_update_from_workflow_with_publication_date(
+        self,
+        client,
+        user,
+        shared_datadir,
+    ):
+        client.force_login(user)
+        contents = (shared_datadir / "workflow_record.json").read_text()
+        data = json.loads(contents)
+
+        response = client.post(
+            reverse("api:article-workflow-import-list"),
+            data,
+            content_type="application/json",
+        )
+        assert response.status_code == status.HTTP_200_OK
+
+        article_id_with_publication_date = response.data["id"]
+        article_with_publication_date = Article.objects.get(
+            id=article_id_with_publication_date
+        )
+        assert (
+            article_with_publication_date.publication_date.strftime("%Y-%m-%d")
+            == "2023-10-31"
+        )
+        data["imprints"][0]["date"] = "2024-06-20"
+        response = client.post(
+            reverse("api:article-workflow-import-list"),
+            data,
+            content_type="application/json",
+        )
+        assert response.status_code == status.HTTP_200_OK
+
+        article_id_with_updated_publication_date = response.data["id"]
+        assert (
+            article_id_with_publication_date == article_id_with_updated_publication_date
+        )
+        article_with_updated_publication_date = Article.objects.get(
+            id=article_id_with_updated_publication_date
+        )
+        assert (
+            article_with_updated_publication_date.publication_date.strftime("%Y-%m-%d")
+            == "2024-06-20"
+        )
 
 
 class TestArticleIdentifierViewSet:
