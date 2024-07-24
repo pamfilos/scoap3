@@ -89,22 +89,36 @@ def _create_article(data, licenses):
         "subtitle": data["titles"][0].get("subtitle", ""),
         "abstract": data["abstracts"][0].get("value", ""),
     }
-    if (
-        article_data.get("id")
-        and Article.objects.filter(pk=article_data["id"]).exists()
-    ):
-        article = Article.objects.get(pk=article_data["id"])
-        article.__dict__.update(**article_data)
-    elif (
-        data.get("dois")[0].get("value")
-        and ArticleIdentifier.objects.filter(
+
+    doi_exists = False
+    doi_value = data.get("dois")[0].get("value")
+    if doi_value:
+        doi_exists = ArticleIdentifier.objects.filter(
             identifier_type="DOI", identifier_value=data.get("dois")[0].get("value")
         ).exists()
-    ):
+
+    # if "control_number" present, means it is a legacy record
+    if data.get("control_number"):
+        if doi_exists:
+            logger.info(
+                f"Creating article with id={data['control_number']} - "
+                f"Article with DOI={doi_value} already exists."
+            )
+        control_number = int(data["control_number"])
+        if Article.objects.filter(pk=control_number).exists():
+            article = Article.objects.get(pk=control_number)
+            article.__dict__.update(**article_data)
+        else:
+            article_data["id"] = control_number
+            article = Article.objects.create(**article_data)
+            article._created_at = data.get("_created") or data.get("record_creation_date")
+    # else if "doi" present, check to update a already inserted article
+    elif doi_exists:
         article = ArticleIdentifier.objects.get(
-            identifier_type="DOI", identifier_value=data.get("dois")[0].get("value")
+            identifier_type="DOI", identifier_value=doi_value
         ).article_id
         article.__dict__.update(**article_data)
+    # else create new
     else:
         article = Article.objects.create(**article_data)
         article._created_at = data.get("_created") or data.get("record_creation_date")

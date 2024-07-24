@@ -34,6 +34,39 @@ class TestArticleViewSet:
             == "The Effective QCD Running Coupling Constant and a Dirac Model for the Charmonium Spectrum"
         )
 
+    def test_create_article_from_legacy(self, client, user, shared_datadir):
+        client.force_login(user)
+        contents = (shared_datadir / "legacy_record.json").read_text()
+        data = json.loads(contents)
+
+        response = client.post(
+            reverse("api:article-workflow-import-list"),
+            data,
+            content_type="application/json",
+        )
+        assert response.status_code == status.HTTP_200_OK
+
+        article_id = response.data["id"]
+
+        assert article_id == int(data["control_number"])
+        assert response.data["title"] == data["titles"][0]["title"]
+
+        contents = (shared_datadir / "legacy_record_update.json").read_text()
+        data_updated = json.loads(contents)
+
+        response = client.post(
+            reverse("api:article-workflow-import-list"),
+            data_updated,
+            content_type="application/json",
+        )
+        assert response.status_code == status.HTTP_200_OK
+
+        article_id = response.data["id"]
+
+        assert article_id == int(data_updated["control_number"])
+        assert response.data["title"] == data_updated["titles"][0]["title"]
+
+
     def test_update_article_from_workflow(self, client, user, shared_datadir):
         client.force_login(user)
         contents = (shared_datadir / "workflow_record.json").read_text()
