@@ -68,7 +68,6 @@ class TestArticleViewSet:
         assert article_id == int(data_updated["control_number"])
         assert response.data["title"] == data_updated["titles"][0]["title"]
 
-
     def test_update_article_from_workflow(self, client, user, shared_datadir):
         client.force_login(user)
         contents = (shared_datadir / "workflow_record.json").read_text()
@@ -244,12 +243,15 @@ class TestArticleViewSet:
         self,
         client,
         user,
-        record,
+        shared_datadir,
     ):
         client.force_login(user)
+        contents = (shared_datadir / "workflow_record.json").read_text()
+        data = json.loads(contents)
+
         response = client.post(
             reverse("api:article-workflow-import-list"),
-            record,
+            data,
             content_type="application/json",
         )
         assert response.status_code == status.HTTP_200_OK
@@ -260,10 +262,10 @@ class TestArticleViewSet:
         )
         assert publication_info_with_journal_year.volume_year == "2023"
 
-        record["publication_info"][0]["year"] = "2024"
+        data["publication_info"][0]["year"] = "2024"
         response = client.post(
             reverse("api:article-workflow-import-list"),
-            record,
+            data,
             content_type="application/json",
         )
         article_id_with_updated_journal_year = response.data["id"]
@@ -273,10 +275,10 @@ class TestArticleViewSet:
         )
         assert journal_info_with_updated_journal_year.volume_year == "2024"
 
-        del record["publication_info"][0]["year"]
+        del data["publication_info"][0]["year"]
         response = client.post(
             reverse("api:article-workflow-import-list"),
-            record,
+            data,
             content_type="application/json",
         )
         assert response.status_code == status.HTTP_200_OK
@@ -289,32 +291,51 @@ class TestArticleViewSet:
         self,
         client,
         user,
-        record,
+        shared_datadir,
     ):
         client.force_login(user)
-        del record["publication_info"][0]["year"]
+        contents = (shared_datadir / "workflow_record.json").read_text()
+        data = json.loads(contents)
+
+        del data["imprints"][0]
+        del data["publication_info"][0]
         response = client.post(
             reverse("api:article-workflow-import-list"),
-            record,
+            data,
             content_type="application/json",
         )
         assert response.status_code == status.HTTP_200_OK
 
         article_id_with_publication_date = response.data["id"]
-        article_with_publication_date = PublicationInfo.objects.get(
-            article_id=article_id_with_publication_date
+
+        try:
+            article_with_publication_date = PublicationInfo.objects.get(
+                article_id=article_id_with_publication_date
+            )
+        except PublicationInfo.DoesNotExist:
+            article_with_publication_date = None
+
+        assert article_with_publication_date is None
+
+        data = json.loads(contents)
+        del data["publication_info"][0]["year"]
+
+        response = client.post(
+            reverse("api:article-workflow-import-list"),
+            data,
+            content_type="application/json",
         )
-        assert article_with_publication_date.volume_year is None
+        assert response.status_code == status.HTTP_200_OK
 
         assert (
             response.data["publication_info"][0]["volume_year"]
             == parse_string_to_date_object(response.data["_created_at"]).year
         )
 
-        record["publication_info"][0]["year"] = "2024"
+        data["publication_info"][0]["year"] = "2024"
         response = client.post(
             reverse("api:article-workflow-import-list"),
-            record,
+            data,
             content_type="application/json",
         )
         assert response.status_code == status.HTTP_200_OK

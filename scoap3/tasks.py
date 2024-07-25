@@ -95,8 +95,12 @@ def _create_article(data, licenses):
         doi_exists = ArticleIdentifier.objects.filter(
             identifier_type="DOI", identifier_value=data.get("dois")[0].get("value")
         ).exists()
-    publication_date = data["imprints"][0].get("date")
 
+    publication_date = None
+    try:
+        publication_date = data["imprints"][0].get("date")
+    except (KeyError, IndexError):
+        pass
     if publication_date:
         article_data["publication_date"] = publication_date
 
@@ -114,7 +118,9 @@ def _create_article(data, licenses):
         else:
             article_data["id"] = control_number
             article = Article.objects.create(**article_data)
-            article._created_at = data.get("_created") or data.get("record_creation_date")
+            article._created_at = data.get("_created") or data.get(
+                "record_creation_date"
+            )
     # else if "doi" present, check to update a already inserted article
     elif doi_exists:
         article = ArticleIdentifier.objects.get(
