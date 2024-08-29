@@ -6,7 +6,11 @@ class AuthorIdentifierType(models.TextChoices):
 
 
 class Author(models.Model):
-    article_id = models.ForeignKey("articles.Article", on_delete=models.CASCADE)
+    article_id = models.ForeignKey(
+        "articles.Article",
+        on_delete=models.CASCADE,
+        related_name="authors",
+    )
     first_name = models.CharField(max_length=255, blank=True, default="")
     last_name = models.CharField(max_length=255, blank=True, default="")
     email = models.EmailField(blank=True, null=True)

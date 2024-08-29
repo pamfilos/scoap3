@@ -320,8 +320,10 @@ def _create_country(affiliation):
                 "code": cc.convert(country, to="iso2"),
                 "name": cc.convert(country, to="name_short"),
             }
-        country_obj, _ = Country.objects.get_or_create(**country_data)
-        logger.info("Country:%s created.", country_obj.name)
+        country_obj, existed = Country.objects.get_or_create(**country_data)
+        logger.info(
+            "Country:%s %s.", country_obj.name, "created" if not existed else "updated"
+        )
         return country_obj
     except LookupError as e:
         capture_exception(e)

@@ -10,8 +10,6 @@ class AuthorIdentifierSerializer(serializers.ModelSerializer):
 
 
 class AuthorSerializer(serializers.ModelSerializer):
-    identifiers = AuthorIdentifierSerializer(many=True, read_only=True)
-
     class Meta:
         model = Author
         fields = "__all__"
