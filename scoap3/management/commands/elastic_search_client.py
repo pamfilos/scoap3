@@ -1,16 +1,16 @@
-from elasticsearch import Elasticsearch
-
+from opensearchpy import OpenSearch
+from opensearchpy.exceptions import AuthenticationException
 from scoap3.management.commands.utils import check_time_unit, get_query
 
 
-class ElastiSearchClient:
+class OpenSearchClient:
     def __init__(self, host, port, username, password, index):
         self.host = host
         self.port = port
         self.username = username
         self.password = password
         self.index = index
-        self.es = Elasticsearch(
+        self.es = OpenSearch(
             [
                 dict(
                     host=self.host,
@@ -24,6 +24,7 @@ class ElastiSearchClient:
                 )
             ]
         )
+        self.es.cluster.health()
 
     def get_items(self, batch_size, gte, time_unit, parse_function, action):
         self.es.indices.refresh(self.index)

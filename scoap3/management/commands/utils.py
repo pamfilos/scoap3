@@ -8,11 +8,16 @@ def get_query(action, gte, time_unit):
             "range": {
                 f"{action}": {
                     "gte": f"now-{gte}{time_unit}/{time_unit}",
-                    "lt": f"now/{time_unit}",
+                    # "lt": f"now/{time_unit}",
                 }
             }
         }
     }
+
+def get_timestamp_str():
+    current_date = datetime.now().date()
+    current_date_str = current_date.strftime("%Y-%m-%d %H:%M:%S")
+    return current_date_str
 
 
 def check_time_unit(time_unit):
@@ -60,20 +65,20 @@ def get_dois_from_response_legacy(es, response, scroll="30s"):
 
 
 def get_countries_from_authors(all_authors):
-    all_affiliations = [
-        one_author["affiliations"]
-        if "affiliations" in one_author
-        else logging.error("Author has no country!")
-        for authors_in_one_record in all_authors
-        for one_author in authors_in_one_record
-    ]
-    countries = [
-        affiliation["country"]
-        if "country" in affiliation
-        else logging.error("Affiliation has no country!")
-        for one_author_affiliations in all_affiliations
-        for affiliation in one_author_affiliations
-    ]
+    all_affiliations = []
+    for authors_in_one_record in all_authors:
+        for one_author in authors_in_one_record:
+            if "affiliations" in one_author:
+                all_affiliations.append(one_author["affiliations"])
+            else:
+                logging.error("Author has no country!")
+    countries = []
+    for one_author_affiliations in all_affiliations:
+        for affiliation in one_author_affiliations:
+            if "country" in affiliation:
+                countries.append(affiliation["country"])
+            else:
+                logging.error("Affiliation has no country!")
     return countries
 
 

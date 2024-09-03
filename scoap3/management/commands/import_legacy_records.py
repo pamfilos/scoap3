@@ -1,4 +1,5 @@
 import time
+from datetime import datetime
 
 import environ
 import urllib3
@@ -9,6 +10,13 @@ from scoap3.tasks import upload_index_range
 
 env = environ.Env()
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
+def convert_to_iso8601(date_string):
+    parsed_date = datetime.strptime(date_string, "%Y-%m-%d")
+
+    iso8601_format = parsed_date.strftime("%Y-%m-%dT%H:%M:%SZ")
+
+    return iso8601_format
 
 
 class Command(BaseCommand):
@@ -52,6 +60,12 @@ class Command(BaseCommand):
             required=False,
             help="Password for Elasticsearch. Uses LEGACY_OPENSEARCH_PASSWORD if empty.",
         )
+        parser.add_argument(
+            "--from-date",
+            type=str,
+            required=False,
+            help="Date 'from' which to fetch articles (article updated).",
+        )
 
     def handle(self, *args, **options):
         if not options["username"]:
@@ -73,6 +87,18 @@ class Command(BaseCommand):
             )
         ]
 
+        es_body = {"query": {"match_all": {}}}
+        if options["from_date"]:
+            es_body =  {
+                "query": {
+                    "range": {
+                        "_updated": {
+                            "gte": convert_to_iso8601(options["from_date"]),
+                        }
+                    }
+                }
+            }
+
         es = Elasticsearch(es_settings)
         es.indices.refresh(options["index"])
         scroll = "30s"
@@ -80,7 +106,7 @@ class Command(BaseCommand):
             index=options["index"],
             scroll=scroll,
             size=options["batch_size"],
-            body={"query": {"match_all": {}}},
+            body=es_body,
         )
 
         scroll_id = response["_scroll_id"]
