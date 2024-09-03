@@ -14,6 +14,7 @@ def get_query(action, gte, time_unit):
         }
     }
 
+
 def get_timestamp_str():
     current_date = datetime.now().date()
     current_date_str = current_date.strftime("%Y-%m-%d %H:%M:%S")

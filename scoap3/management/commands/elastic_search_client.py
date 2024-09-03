@@ -1,5 +1,5 @@
 from opensearchpy import OpenSearch
-from opensearchpy.exceptions import AuthenticationException
+
 from scoap3.management.commands.utils import check_time_unit, get_query
 
 

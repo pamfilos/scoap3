@@ -11,6 +11,7 @@ from scoap3.tasks import upload_index_range
 env = environ.Env()
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
+
 def convert_to_iso8601(date_string):
     parsed_date = datetime.strptime(date_string, "%Y-%m-%d")
 
@@ -89,7 +90,7 @@ class Command(BaseCommand):
 
         es_body = {"query": {"match_all": {}}}
         if options["from_date"]:
-            es_body =  {
+            es_body = {
                 "query": {
                     "range": {
                         "_updated": {
