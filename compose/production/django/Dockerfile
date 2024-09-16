@@ -1,4 +1,4 @@
-FROM node:18 as client-builder
+FROM node:18 AS client-builder
 
 ARG APP_HOME=/app
 ARG APP_UI=/ui
@@ -27,7 +27,7 @@ ARG APP_UI=/ui
 WORKDIR ${APP_HOME}
 
 ARG BUILD_ENVIRONMENT=production
-ENV BUILD_ENV ${BUILD_ENVIRONMENT}
+ENV BUILD_ENV=${BUILD_ENVIRONMENT}
 
 ENV PATH="/root/.local/bin:${PATH}" \
     POETRY_VIRTUALENVS_CREATE=false \
