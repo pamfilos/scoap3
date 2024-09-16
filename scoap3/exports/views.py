@@ -27,9 +27,9 @@ def generate_csv_response(data, action_name, write_header=True):
     return response
 
 
-class ExportView(PermissionRequiredMixin, FormView):
-    permission_required = "users.partner_export"
-    template_name = "tools/export.html"
+class ExportView( FormView):
+    # permission_required = "users.partner_export"
+    template_name = "admin/tools.html"
     form_class = AffiliationExportForm
     second_form_class = AuthorExportForm
 
@@ -42,7 +42,7 @@ class ExportView(PermissionRequiredMixin, FormView):
     def post(self, request, *args, **kwargs):
         form = self.get_form()
         form2 = self.second_form_class(request.POST)
-        if form.is_valid() and form2.is_valid():
+        if form.is_valid() or form2.is_valid():
             return self.form_valid(form, form2)
         else:
             return self.form_invalid(form, form2)
@@ -51,13 +51,13 @@ class ExportView(PermissionRequiredMixin, FormView):
         try:
             if "affiliation_export" in self.request.POST:
                 action_name = "affiliation_export"
-                year = form.cleaned_data.get("year")
-                country = form.cleaned_data.get("country_code")
+                year = form.cleaned_data.get("aff_year")
+                country = form.cleaned_data.get("aff_country").code
                 result = affiliation_export(year or None, country or None)
             if "author_export" in self.request.POST:
                 action_name = "author_export"
-                year = form2.cleaned_data.get("year")
-                country = form2.cleaned_data.get("country_code")
+                year = form2.cleaned_data.get("author_year")
+                country = form2.cleaned_data.get("author_country").code
                 result = author_export(year or None, country or None)
 
             response = generate_csv_response(result, action_name)

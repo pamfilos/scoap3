@@ -45,6 +45,7 @@ habanero = "^1.2.3"
 django-lifecycle = "^1.1.2"
 country-converter = "^1.2"
 numpy = "<2"
+django-select2 = "^8.2.1"
 
 [tool.poetry.dev-dependencies]
 Werkzeug = {extras = ["watchdog"], version = "^2.3.4"}

@@ -15,9 +15,9 @@ urlpatterns = [
         "about/", TemplateView.as_view(template_name="pages/about.html"), name="about"
     ),
     # Django Admin, use {% url 'admin:index' %}
-    # path(settings.ADMIN_URL + "tools/", get_exports, name="admin_tools"),
+    path(settings.ADMIN_URL + "tools/", admin.site.admin_view(ExportView.as_view()), name="admin_tools"),
     path(settings.ADMIN_URL, admin.site.urls),
-    path("tools/export", ExportView.as_view(), name="tools"),
+    path("select2/", include("django_select2.urls")),
     # User management
     path("users/", include("scoap3.users.urls", namespace="users")),
     path("accounts/", include("allauth.urls")),
