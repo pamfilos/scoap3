@@ -42,7 +42,7 @@ const YearFacet = ({ data }: any) => {
 
   const createQueryString = useCallback(
     (name: string, value: any) => {
-      const params = new URLSearchParams(searchParams)
+      const params = new URLSearchParams(searchParams.toString())
 
       params.delete(name);
       params.delete("page");
@@ -80,7 +80,7 @@ const YearFacet = ({ data }: any) => {
   const onBarMouseOut = () => setHoveredBar(null);
 
   const resetFilters = () => {
-    const params = new URLSearchParams(searchParams);
+    const params = new URLSearchParams(searchParams.toString());
     params.delete('publication_year__range');
     params.delete('page');
     router.push(pathname + (params.toString() ? `?${params.toString()}` : ""))

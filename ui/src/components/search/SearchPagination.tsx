@@ -17,7 +17,7 @@ const SearchPagination: React.FC<SearchPagination> = ({ count, params }) => {
   const currentPage = searchParams.get("page") || 1
 
   const onPageChange = (page: number) => {
-    const params = new URLSearchParams(searchParams)
+    const params = new URLSearchParams(searchParams.toString())
     params.set("page", `${page}`);
 
     router.push(pathname + (params.toString() ? `?${params.toString()}` : ''));

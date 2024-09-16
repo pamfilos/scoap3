@@ -24,7 +24,7 @@ const CheckboxFacet: React.FC<CheckboxFacetProps> = ({
 
   const createQueryString = useCallback(
     (name: string, value: any) => {
-      const params = new URLSearchParams(searchParams)
+      const params = new URLSearchParams(searchParams.toString())
 
       params.delete(name);
       params.delete("page");
