@@ -2,7 +2,8 @@ import csv
 from datetime import datetime
 
 from django.contrib import messages
-from django.contrib.auth.mixins import PermissionRequiredMixin
+
+# from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.http import HttpResponse
 from django.views.generic.edit import FormView
 
@@ -27,7 +28,7 @@ def generate_csv_response(data, action_name, write_header=True):
     return response
 
 
-class ExportView( FormView):
+class ExportView(FormView):
     # permission_required = "users.partner_export"
     template_name = "admin/tools.html"
     form_class = AffiliationExportForm

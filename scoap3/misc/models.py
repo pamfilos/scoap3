@@ -16,6 +16,7 @@ class Country(models.Model):
     def __str__(self):
         return f"{self.name} ({self.code})"
 
+
 class Affiliation(models.Model):
     author_id = models.ManyToManyField("authors.Author", blank=True)
     country = models.ForeignKey("misc.Country", on_delete=models.CASCADE, null=True)

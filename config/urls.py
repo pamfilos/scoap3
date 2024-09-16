@@ -15,7 +15,11 @@ urlpatterns = [
         "about/", TemplateView.as_view(template_name="pages/about.html"), name="about"
     ),
     # Django Admin, use {% url 'admin:index' %}
-    path(settings.ADMIN_URL + "tools/", admin.site.admin_view(ExportView.as_view()), name="admin_tools"),
+    path(
+        settings.ADMIN_URL + "tools/",
+        admin.site.admin_view(ExportView.as_view()),
+        name="admin_tools",
+    ),
     path(settings.ADMIN_URL, admin.site.urls),
     path("select2/", include("django_select2.urls")),
     # User management
