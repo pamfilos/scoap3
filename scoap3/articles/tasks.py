@@ -26,6 +26,22 @@ def check_license(obj):
         )
 
 
+def check_required_file_formats(obj):
+    required_formats = ["pdf", "xml"]
+    available_formats = [
+        file.file.name.split(".")[-1] for file in obj.related_files.all()
+    ]
+
+    missing_formats = [f for f in required_formats if f not in available_formats]
+
+    if missing_formats:
+        return (
+            False,
+            f"Missing required file formats: {', '.join(missing_formats)}.",
+        )
+    return True, "All required file formats are present."
+
+
 def check_file_formats(obj):
     required_formats = ["pdf", "pdf_a", "xml"]
     available_formats = [
@@ -152,6 +168,10 @@ def compliance_checks(article_id):
         check_arxiv_category_compliance,
         check_arxiv_category_description,
     ) = check_arxiv_category(article)
+    (
+        check_required_file_formats_compliance,
+        check_required_file_formats_description,
+    ) = check_required_file_formats(article)
     check_file_formats_compliance, check_file_formats_description = check_file_formats(
         article
     )
@@ -171,6 +191,8 @@ def compliance_checks(article_id):
         check_arxiv_category_description=check_arxiv_category_description,
         check_doi_registration_time=check_doi_registration_compliance,
         check_doi_registration_time_description=check_doi_registration_description,
+        check_required_file_formats=check_required_file_formats_compliance,
+        check_required_file_formats_description=check_required_file_formats_description,
         check_file_formats=check_file_formats_compliance,
         check_file_formats_description=check_file_formats_description,
         check_license=check_license_compliance,
@@ -178,6 +200,7 @@ def compliance_checks(article_id):
         check_authors_affiliation=check_affiliations_compliance,
         check_authors_affiliation_description=check_affiliations_description,
     )
+    report.compliant = report.is_compliant()
     report.save()
     logger.info("Compliance checks completed for article %s", article_id)
     return f"Compliance checks completed for article {article_id}"
