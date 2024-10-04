@@ -239,7 +239,7 @@ OPENSEARCH_DSL = {
         "verify_certs": False,
         "timeout": 30,
         "http_compress": True,
-        "url_prefix": env("OPENSEARCH_URL_PREFIX"),
+        "url_prefix": env("OPENSEARCH_URL_PREFIX", None),
     },
 }
 
