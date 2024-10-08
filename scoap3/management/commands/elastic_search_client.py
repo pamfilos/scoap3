@@ -19,7 +19,7 @@ class OpenSearchClient:
                     use_ssl=True,
                     verify_certs=False,
                     timeout=60,
-                    url_prefix="es",
+                    url_prefix="os",
                     http_compress=True,
                 )
             ]

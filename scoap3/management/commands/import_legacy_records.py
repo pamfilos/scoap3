@@ -53,7 +53,7 @@ class Command(BaseCommand):
             "--username",
             type=str,
             required=False,
-            help="Username for Elasticsearch. Uses LEGACY_OPENSEARCH_USER if empty.",
+            help="Username for Elasticsearch. Uses LEGACY_OPENSEARCH_USERNAME if empty.",
         )
         parser.add_argument(
             "--password",
@@ -70,7 +70,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         if not options["username"]:
-            options["username"] = env("LEGACY_OPENSEARCH_USER")
+            options["username"] = env("LEGACY_OPENSEARCH_USERNAME")
         if not options["password"]:
             options["password"] = env("LEGACY_OPENSEARCH_PASSWORD")
 
@@ -83,7 +83,7 @@ class Command(BaseCommand):
                 use_ssl=True,
                 verify_certs=False,
                 timeout=60,
-                url_prefix="es",
+                url_prefix="os",
                 http_compress=True,
             )
         ]
