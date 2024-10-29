@@ -5,6 +5,7 @@ from django_elasticsearch_dsl_drf.filter_backends import (
     FilteringFilterBackend,
     OrderingFilterBackend,
     SearchFilterBackend,
+    SimpleQueryStringSearchFilterBackend,
 )
 from django_elasticsearch_dsl_drf.viewsets import BaseDocumentViewSet
 from opensearch_dsl import DateHistogramFacet, TermsFacet
@@ -106,6 +107,7 @@ class ArticleDocumentView(BaseDocumentViewSet):
         FilteringFilterBackend,
         OrderingFilterBackend,
         DefaultOrderingFilterBackend,
+        SimpleQueryStringSearchFilterBackend,
     ]
     renderer_classes = api_settings.DEFAULT_RENDERER_CLASSES + [ArticleCSVRenderer]
 
