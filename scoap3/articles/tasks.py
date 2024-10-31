@@ -163,14 +163,15 @@ def check_contains_funded_by_scoap3(article):
             return False, "No files found for the given article."
 
         for article_file in article_files:
-            try:
-                if is_string_in_pdf(article_file, "Funded by SCOAP3"):
-                    return (
-                        True,
-                        f"Files contain the required text: 'Funded by SCOAP3'. File: {article_file.file.path}",
-                    )
-            except FileNotFoundError:
-                return False, f"File not found: {article_file.file.path}"
+            if article_file.filetype in ["pdf", "pdf/a"]:
+                try:
+                    if is_string_in_pdf(article_file, "Funded by SCOAP3"):
+                        return (
+                            True,
+                            f"Files contain the required text: 'Funded by SCOAP3'. File: {article_file.file.url}",
+                        )
+                except FileNotFoundError:
+                    return False, f"File not found: {article_file.file.url}"
 
         return False, "Files do not contain the required text: 'Funded by SCOAP3'"
     except Exception as e:

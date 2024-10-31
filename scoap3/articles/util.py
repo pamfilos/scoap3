@@ -31,19 +31,23 @@ def parse_string_to_date_object(date_string):
 
 def is_string_in_pdf(article_file, search_string):
     try:
-        pdf_file = article_file.file.read()
-        document = fitz.open(stream=pdf_file)
-        search_string_lower = search_string.lower()
+        with article_file.file.open(mode="rb") as _file:
+            file_content = _file.read()
 
-        for page_num in range(document.page_count):
-            page = document[page_num]
-            page_text = page.get_text().lower()
-            if search_string_lower in page_text:
-                document.close()
-                return True
+            if article_file.file.name.endswith(".pdf"):
+                document = fitz.open(stream=file_content, filetype="pdf")
+            else:
+                document = fitz.open(stream=file_content, filetype="txt")
+            search_string_lower = search_string.lower()
+            for page_num in range(document.page_count):
+                page = document[page_num]
+                page_text = page.get_text().lower()
+                if search_string_lower in page_text:
+                    document.close()
+                    return True
 
-        document.close()
-        return False
+            document.close()
+            return False
     except FileNotFoundError:
         raise FileNotFoundError(f"File not found: {article_file}")
     except Exception as e:

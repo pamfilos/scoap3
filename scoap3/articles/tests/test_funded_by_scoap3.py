@@ -40,9 +40,9 @@ def create_pdf_with_text():
 
 @pytest.fixture
 def attach_file_to_article(db):
-    def _attach_file_to_article(article, content, file_name):
+    def _attach_file_to_article(article, content, file_name, filetype="pdf"):
         file = File(content, name=file_name)
-        ArticleFile.objects.create(article_id=article, file=file)
+        ArticleFile.objects.create(article_id=article, file=file, filetype=filetype)
 
     return _attach_file_to_article
 
@@ -111,8 +111,12 @@ class TestCheckContainsFundedBySCOAP3:
 
         file_with_text = create_pdf_with_text("Funded by SCOAP3")
         file_without_text = create_pdf_with_text("Other text")
+        file_without_text_xml = create_pdf_with_text("<>Other textXML</>")
         attach_file_to_article(article, file_with_text, "file_with_text.pdf")
         attach_file_to_article(article, file_without_text, "file_without_text.pdf")
+        attach_file_to_article(
+            article, file_without_text_xml, "file_without_text.xml", filetype="xml"
+        )
 
         result, message = check_contains_funded_by_scoap3(article)
         assert result is True
