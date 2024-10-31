@@ -14,6 +14,7 @@ export type Params = {
   page?: number;
   page_size?: number;
   search?: string;
+  search_simple_query_string?: string;
   country?: string | string[];
   journal?: string | string[];
   publication_year__range?: string;

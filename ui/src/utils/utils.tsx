@@ -19,6 +19,9 @@ export const authToken = Token
 const buildSearchParams = (q: Params): string => {
   const searchParams = new URLSearchParams();
 
+  // replace 'search' param with 'search_simple_query_string'
+  if (q["search"]) q['search_simple_query_string'] = q["search"];
+
   Object.entries(q).forEach(([key, value]) => {
     if (Array.isArray(value)) {
       value.forEach(item => searchParams.append(key, item));
