@@ -108,6 +108,7 @@ STORAGES = {
         "OPTIONS": {
             "location": "static/",
             "default_acl": "public-read",
+            "file_overwrite": False,
         },
     },
     "legacy-records": {
