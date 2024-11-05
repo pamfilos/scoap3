@@ -102,6 +102,7 @@ THIRD_PARTY_APPS = [
 ]
 
 LOCAL_APPS = [
+    "scoap3",
     "scoap3.users",
     "scoap3.articles",
     "scoap3.authors",
