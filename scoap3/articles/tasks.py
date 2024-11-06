@@ -88,7 +88,8 @@ def check_arxiv_category(obj):
         "Advances in High Energy Physics",
         "Physical Review C",
         "Physical Review D",
-        "Physical Review Letters" "Acta Physica Polonica B",
+        "Physical Review Letters",
+        "Acta Physica Polonica B",
     ]
     journal_title = (
         obj.publication_info.first().journal_title
@@ -101,7 +102,7 @@ def check_arxiv_category(obj):
         if any(cat.primary and cat.category.startswith("hep") for cat in categories):
             return True, "ArXiv category is compliant for partial journal."
         return False, "Primary ArXiv category is not compliant for partial journal."
-    return False, "ArXiv category compliance not applicable."
+    return True, "ArXiv category compliance not applicable."
 
 
 def check_doi_registration_time(obj):
