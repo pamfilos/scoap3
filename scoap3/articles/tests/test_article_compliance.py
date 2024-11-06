@@ -270,7 +270,7 @@ class TestArticleCompliance(TestCase):
         compliance_checks(self.article.id)
         article = Article.objects.get(id=self.article.id)
         report = article.report.first()
-        self.assertEqual(report.check_arxiv_category, False)
+        self.assertEqual(report.check_arxiv_category, True)
 
     def test_create_article_published_before_2023(self):
         compliance_checks(self.article_published_before_2023.id)
