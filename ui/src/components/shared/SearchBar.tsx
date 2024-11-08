@@ -15,7 +15,8 @@ const SearchBar: React.FC<SearchBarProps> = ({
   className,
 }) => {
   const router = useRouter();
-  const value = useSearchParams().get("search") ?? "";
+  // const value = useSearchParams().get("search") ?? "";
+  const value = useSearchParams().get("search_simple_query_string") ?? "";
 
   const [val, setVal] = useState(value);
 
@@ -25,7 +26,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
     <>
       {!hide && (
         <Search
-          onSearch={() => router.push(getSearchUrl({...(val ? {search: val} : {})} , true))}
+          onSearch={() => router.push(getSearchUrl({...(val ? {search_simple_query_string: val} : {})} , true))}
           placeholder={placeholder}
           enterButton
           className={className}
