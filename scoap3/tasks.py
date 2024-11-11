@@ -308,7 +308,6 @@ def _create_author_identifier(data, authors):
 
 def _create_country(affiliation):
     country = affiliation.get("country", "")
-    logger.info("Creating country:%s for affiliation:%s", country, affiliation)
     try:
         if not country or country == "HUMAN CHECK":
             return None
@@ -338,10 +337,9 @@ def _create_country(affiliation):
                 "code": cc.convert(country, to="iso2"),
                 "name": cc.convert(country, to="name_short"),
             }
-        country_obj, existed = Country.objects.get_or_create(**country_data)
-        logger.info(
-            "Country:%s %s.", country_obj.name, "created" if not existed else "updated"
-        )
+        country_obj, created = Country.objects.get_or_create(**country_data)
+        if created:
+            logger.info("Created country:%s for affiliation:%s", country, affiliation)
         return country_obj
     except LookupError as e:
         capture_exception(e)
@@ -358,19 +356,17 @@ def _create_affiliation(data, authors):
                 "value": affiliation.get("value", ""),
                 "organization": affiliation.get("organization", ""),
             }
-            logger.info(
-                "Created country:%s for author:%s affiliation:%s",
-                country.name if country else "No Country",
-                author.get("full_name", "No author name"),
-                affiliation.get("value", "No affiliation value"),
-            )
             try:
                 affiliation, _ = Affiliation.objects.get_or_create(**affiliation_data)
                 affiliation.author_id.add(authors[idx].id)
                 affiliations.append(affiliation)
 
             except MultipleObjectsReturned:
-                print(affiliation_data)
+                logger.error(
+                    "While creating author:%s affiliation:%s",
+                    author.get("full_name", "No author name"),
+                    affiliation.get("value", "No affiliation value"),
+                )
     return affiliations
 
 
