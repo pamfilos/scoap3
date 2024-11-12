@@ -5,7 +5,6 @@ import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import "react-vis/dist/style.css";
 
 import { PublicationYear, YearFacetData } from "@/types";
-import { URLSearchParams } from "url";
 
 
 const mapInitialDataToYears = (
@@ -34,7 +33,7 @@ const YearFacet = ({ data }: any) => {
     setInitialEndpoints(getSliderEndpoints(initialData));
   }, [data]);
 
-  const resolveYearQuery = (name: string, params: URLSearchParams, range: number[]) => {
+  const resolveYearQuery = (name: string, params: any, range: number[]) => {
     if (range[0] === range[1]) {
       params.set(`${name}__gte`, range[0]?.toString()+"-01-01")
       params.set(`${name}__lte`, range[0]?.toString()+"-12-31")
