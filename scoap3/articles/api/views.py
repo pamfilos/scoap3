@@ -129,10 +129,7 @@ class ArticleDocumentView(BaseDocumentViewSet):
     filter_fields = {
         "publication_year": {
             "field": "publication_date",
-            "lookups": [
-                LOOKUP_FILTER_RANGE,
-                LOOKUP_QUERY_IN,
-            ],
+            "lookups": [LOOKUP_FILTER_RANGE, LOOKUP_QUERY_IN, "lte", "gte"],
         },
         "journal": {
             "field": "publication_info.journal_title",

@@ -5,6 +5,7 @@ import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import "react-vis/dist/style.css";
 
 import { PublicationYear, YearFacetData } from "@/types";
+import { URLSearchParams } from "url";
 
 
 const mapInitialDataToYears = (
@@ -33,10 +34,14 @@ const YearFacet = ({ data }: any) => {
     setInitialEndpoints(getSliderEndpoints(initialData));
   }, [data]);
 
-  const resolveYearQuery = (range: number[]) => {
+  const resolveYearQuery = (name: string, params: URLSearchParams, range: number[]) => {
     if (range[0] === range[1]) {
+      params.set(`${name}__gte`, range[0]?.toString()+"-01-01")
+      params.set(`${name}__lte`, range[0]?.toString()+"-12-31")
       return range[0]?.toString();
     }
+    params.set(`${name}__gte`, range[0]?.toString()+"-01-01")
+    params.set(`${name}__lte`, range[1]?.toString()+"-12-31")
     return range.join("__");
   };
 
@@ -44,9 +49,10 @@ const YearFacet = ({ data }: any) => {
     (name: string, value: any) => {
       const params = new URLSearchParams(searchParams.toString())
 
-      params.delete(name);
+      params.delete(`${name}__lte`);
+      params.delete(`${name}__gte`);
       params.delete("page");
-      params.set(name, resolveYearQuery([value[0].x, value[1].x]));
+      resolveYearQuery(name, params, [value[0].x, value[1].x])
 
       return params.toString()
     },
@@ -64,12 +70,12 @@ const YearFacet = ({ data }: any) => {
 
   const onSliderAfterChange = (data: number[]) => {
     setSliderEndpoints(data)
-    const params = createQueryString('publication_year__range',  [{x:data[0]}, {x:data[1]}]);
+    const params = createQueryString('publication_year',  [{x:data[0]}, {x:data[1]}]);
     router.push(pathname + (params ? `?${params.toString()}` : ""))
   };
 
   const onBarClick = (value: YearFacetData) => {
-    const params = createQueryString('publication_year__range', [value, value]);
+    const params = createQueryString('publication_year', [value, value]);
     router.push(pathname + (params ? `?${params.toString()}` : ""))
   };
 
@@ -81,7 +87,8 @@ const YearFacet = ({ data }: any) => {
 
   const resetFilters = () => {
     const params = new URLSearchParams(searchParams.toString());
-    params.delete('publication_year__range');
+    params.delete('publication_year__lte');
+    params.delete('publication_year__gte');
     params.delete('page');
     router.push(pathname + (params.toString() ? `?${params.toString()}` : ""))
   };
@@ -98,7 +105,7 @@ const YearFacet = ({ data }: any) => {
   return (
     <Card title="Year" className="search-facets-facet mb-5">
       <div>
-        {searchParams.get('publication_year__range') && (
+        {(searchParams.get('publication_year__lte') || searchParams.get('publication_year__gte')) && (
           <div className="text-right mb-3">
             <Button
               onClick={resetFilters}
