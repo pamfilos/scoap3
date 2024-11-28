@@ -216,6 +216,28 @@ class TestArticleViewSet:
         assert len(expected_dois) == 1
         assert "10.5506/APhysPolB.54.10-A3" in expected_dois
 
+    def test_create_article_from_workflow_without_abstract(
+        self, client, user, shared_datadir
+    ):
+        client.force_login(user)
+        contents = (shared_datadir / "workflow_record.json").read_text()
+        data = json.loads(contents)
+
+        del data["abstracts"]
+        response = client.post(
+            reverse("api:article-workflow-import-list"),
+            data,
+            content_type="application/json",
+        )
+
+        assert response.status_code == status.HTTP_200_OK
+        assert "abstract" in response.data
+        assert response.data["abstract"] == ""
+
+        article_id = response.data["id"]
+        article = Article.objects.get(id=article_id)
+        assert article.abstract == ""
+
     def test_create_article_from_workflow_without_publication_date(
         self, client, user, shared_datadir
     ):

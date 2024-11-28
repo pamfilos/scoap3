@@ -86,8 +86,12 @@ def _create_article(data, licenses):
     article_data = {
         "title": data["titles"][0].get("title"),
         "subtitle": data["titles"][0].get("subtitle", ""),
-        "abstract": data["abstracts"][0].get("value", ""),
     }
+
+    try:
+        article_data["abstract"] = data["abstracts"][0].get("value", "")
+    except (KeyError, IndexError):
+        pass
 
     doi_exists = False
     doi_value = data.get("dois")[0].get("value")
