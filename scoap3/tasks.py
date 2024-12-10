@@ -82,12 +82,11 @@ def _create_licenses(data):
     return licenses
 
 
-def _create_article(data, licenses):
+def _create_article(data):
     article_data = {
         "title": data["titles"][0].get("title"),
         "subtitle": data["titles"][0].get("subtitle", ""),
     }
-
     try:
         article_data["abstract"] = data["abstracts"][0].get("value", "")
     except (KeyError, IndexError):
@@ -133,11 +132,16 @@ def _create_article(data, licenses):
         if publication_date:
             article_data["publication_date"] = publication_date
         article.__dict__.update(**article_data)
+        if len(data.get("authors", [])) > 0:
+            article.authors.all().delete()
+
     # else create new
     else:
         article_data["publication_date"] = publication_date
         article = Article.objects.create(**article_data)
         article._created_at = data.get("_created") or data.get("record_creation_date")
+
+    licenses = _create_licenses(data["license"])
     article.related_licenses.set(licenses)
     article.save()
     return article
@@ -374,9 +378,17 @@ def _create_affiliation(data, authors):
     return affiliations
 
 
+def get_articles_by_doi(dois):
+    articles = Article.objects.filter(
+        article_identifiers__identifier_type="DOI",
+        article_identifiers__identifier_value__in=dois,
+    ).distinct()
+
+    return articles
+
+
 def import_to_scoap3(data, migrate_files):
-    licenses = _create_licenses(data["license"])
-    article = _create_article(data, licenses)
+    article = _create_article(data)
     if migrate_files:
         _create_article_file(data, article)
     _create_article_identifier(data, article)
@@ -393,8 +405,7 @@ def import_to_scoap3(data, migrate_files):
 
 
 def update_affiliations(data):
-    licenses = _create_licenses(data["license"])
-    article = _create_article(data, licenses)
+    article = _create_article(data)
     authors = _create_author(data, article)
     _create_affiliation(data, authors)
 

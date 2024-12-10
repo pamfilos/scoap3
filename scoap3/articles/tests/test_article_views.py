@@ -6,6 +6,7 @@ from rest_framework import status
 
 from scoap3.articles.models import Article
 from scoap3.articles.util import parse_string_to_date_object
+from scoap3.authors.models import Author
 from scoap3.misc.models import PublicationInfo
 
 pytestmark = pytest.mark.django_db
@@ -446,6 +447,180 @@ class TestArticleViewSet:
             article_id=article_id_with_updated_publication_date
         )
         assert article_with_updated_publication_date.volume_year == "2024"
+
+    def test_articles_from_workflows_duplicates(self, client, user):
+        client.force_login(user)
+        data = {
+            "license": [
+                {
+                    "url": "http://creativecommons.org/licenses/by/4.0/",
+                    "license": "CC-BY-4.0",
+                }
+            ],
+            "copyright": [{"statement": "The Author"}],
+            "_oai": {
+                "updated": "2023-10-31T08:21:45Z",
+                "id": "oai:repo.scoap3.org:81204",
+                "sets": ["APPB"],
+            },
+            "dois": [{"value": "10.5506/APhysPolB.54.10-A3"}],
+            "_files": [
+                {
+                    "checksum": "md5:2ff0ee8af466b72271926bcfed748017",
+                    "filetype": "pdf",
+                    "bucket": "e8c24dab-4bf6-403d-848a-fdafe0b62042",
+                    "version_id": "9bdb249d-4805-4faa-b784-41b8a599ca74",
+                    "key": "10.5506/APhysPolB.54.10-A3.pdf",
+                    "size": 505407,
+                },
+                {
+                    "checksum": "md5:b215d3b2e0697ac47c98c90f8c5a51f7",
+                    "filetype": "pdfa",
+                    "bucket": "e8c24dab-4bf6-403d-848a-fdafe0b62042",
+                    "version_id": "69e24af7-3785-472b-80cc-948ff155e406",
+                    "key": "10.5506/APhysPolB.54.10-A3.pdfa",
+                    "size": 977378,
+                },
+            ],
+            "record_creation_date": "2023-10-31T08:20:22.109303",
+            "authors": [
+                {
+                    "affiliations": [
+                        {
+                            "country": "Colombia",
+                            "value": "Universidad Nacional de Colombia, Bogot\u00e1, Colombia",
+                        }
+                    ],
+                    "full_name": "De Sanctis, M.",
+                }
+            ],
+            "titles": [
+                {
+                    "title": "The Effective QCD Running Coupling Constant and a Dirac Model for the Charmonium Spectrum"
+                }
+            ],
+            "arxiv_eprints": [{"categories": ["hep-ph"], "value": "2310.16258"}],
+            "publication_info": [
+                {
+                    "page_end": "13",
+                    "journal_title": "Acta Physica Polonica B",
+                    "material": "article",
+                    "journal_volume": "54",
+                    "year": 2023,
+                    "page_start": "A3.1",
+                    "journal_issue": "10",
+                }
+            ],
+            "$schema": "http://repo.scoap3.org/schemas/hep.json",
+            "abstracts": [
+                {
+                    "value": 'The QCD <span class="it">effective charge</span> extracted from the experimental data is used to construct the vector interaction of a Dirac relativistic model for the charmonium spectrum. The process required to fit the spectrum is discussed and the relationship with a previous study of the vector interaction is analyzed.'  # noqa: E501
+                }
+            ],
+            "imprints": [
+                {"date": "2023-10-31", "publisher": "Jagiellonian University"}
+            ],
+            "acquisition_source": {
+                "date": "2023-10-31T08:20:22.109321",
+                "source": "Jagiellonian University",
+                "method": "scroap3_push",
+            },
+        }
+        response = client.post(
+            reverse("api:article-workflow-import-list"),
+            data,
+            content_type="application/json",
+        )
+        assert response.status_code == status.HTTP_200_OK
+
+        response2 = client.post(
+            reverse("api:article-workflow-import-list"),
+            data,
+            content_type="application/json",
+        )
+        assert response2.status_code == status.HTTP_200_OK
+
+        article_id = response.data["id"]
+        article = Article.objects.get(id=article_id)
+        assert (
+            article.title
+            == "The Effective QCD Running Coupling Constant and a Dirac Model for the Charmonium Spectrum"
+        )
+
+        data2 = data.copy()
+        data["titles"][0]["title"] = "New title"
+        data["dois"].append({"value": "10.5506/APhysPolB.54.10-A5"})
+        data["authors"] = [
+            {
+                "affiliations": [
+                    {
+                        "country": "Colombia",
+                        "value": "Universidad Nacional de Colombia, Bogot\u00e1, Colombia",
+                    }
+                ],
+                "full_name": "De Sanctis, M.",
+            },
+            {
+                "affiliations": [
+                    {
+                        "country": "Brazil",
+                        "value": "Universidad Nacional de Brazil, Sao\u00e1, Brazil",
+                    }
+                ],
+                "full_name": "Authorius, M.",
+            },
+        ]
+        response = client.post(
+            reverse("api:article-workflow-import-list"),
+            data,
+            content_type="application/json",
+        )
+        assert response.status_code == status.HTTP_200_OK
+
+        all_authors = Author.objects.all()
+        assert len(all_authors) == 2
+
+        data2["authors"] = [
+            {
+                "affiliations": [
+                    {
+                        "country": "Colombia",
+                        "value": "Universidad Nacional de Colombia, Bogot\u00e1, Colombia",
+                    }
+                ],
+                "full_name": "De Sanccctis, M.",
+            },
+            {
+                "affiliations": [
+                    {
+                        "country": "Brazil",
+                        "value": "Universidad Nacional de Brazil, Sao\u00e1, Brazil",
+                    }
+                ],
+                "full_name": "Authorius, M.",
+            },
+        ]
+        response = client.post(
+            reverse("api:article-workflow-import-list"),
+            data2,
+            content_type="application/json",
+        )
+        assert response.status_code == status.HTTP_200_OK
+
+        all_authors = Author.objects.all()
+        assert len(all_authors) == 2
+
+        article_id = response.data["id"]
+        article = Article.objects.get(id=article_id)
+        expected_dois = [
+            doi.identifier_value
+            for doi in article.article_identifiers.filter(identifier_type="DOI").all()
+        ]
+
+        assert article.title == "New title"
+        assert len(expected_dois) == 2
+        assert "10.5506/APhysPolB.54.10-A5" in expected_dois
+        assert "10.5506/APhysPolB.54.10-A3" in expected_dois
 
 
 class TestArticleIdentifierViewSet:
