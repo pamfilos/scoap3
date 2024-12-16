@@ -423,10 +423,14 @@ def upload_index_range(es_settings, search_index, doc_ids, folder_name):
     storage = storages["legacy-records"]
 
     for document in documents:
-        data = document["_source"]
-        file_name = data["control_number"]
-        json_data = io.BytesIO(json.dumps(data, ensure_ascii=False).encode("UTF-8"))
-        storage.save(f"{folder_name}/{file_name}.json", json_data)
+        try:
+            data = document["_source"]
+            file_name = data["control_number"]
+            json_data = io.BytesIO(json.dumps(data, ensure_ascii=False).encode("UTF-8"))
+            storage.save(f"{folder_name}/{file_name}.json", json_data)
+        except Exception as e:
+            logger.error(f"upload_index_range::error processing document: {e}")
+            continue
 
 
 @celery_app.task(acks_late=True)
