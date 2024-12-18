@@ -1,4 +1,5 @@
 import logging
+import os
 from datetime import datetime
 
 from celery import shared_task
@@ -181,6 +182,9 @@ def check_contains_funded_by_scoap3(article):
 
 @shared_task(name="compliance_checks", acks_late=True)
 def compliance_checks(article_id):
+    if os.getenv("COMPLIANCE_DISABLED", "0") == "1":
+        return f"compliance disabled:: article {str(article_id)}"
+
     try:
         article = Article.objects.get(id=article_id)
     except Article.DoesNotExist:
