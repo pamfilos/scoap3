@@ -223,7 +223,7 @@ sentry_sdk.init(
 # -------------------------------------------------------------------------------
 # Tools that generate code samples can use SERVERS to point to the correct domain
 SPECTACULAR_SETTINGS["SERVERS"] = [  # noqa: F405
-    {"url": "https://scoap3.org", "description": "Production server"}
+    {"url": "https://backend.scoap3.org", "description": "Production server"}
 ]
 
 # Opensearch
