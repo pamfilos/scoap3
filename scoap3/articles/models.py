@@ -1,5 +1,6 @@
 import datetime
 import mimetypes
+import os
 from datetime import date
 
 from django.db import models
@@ -62,6 +63,9 @@ class Article(LifecycleModelMixin, models.Model):
     @hook(AFTER_CREATE, on_commit=True)
     def on_save(self):
         from scoap3.articles.tasks import compliance_checks
+
+        if os.getenv("COMPLIANCE_DISABLED", "0") == "1":
+            return
 
         compliance_checks.delay(self.id)
 
