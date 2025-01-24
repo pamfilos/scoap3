@@ -43,7 +43,7 @@ const Partners = () => {
                 </p>
                 <a
                   // FIXME add correct url for
-                  href={`${BASE_URL}/admin/register`}
+                  href={'mailto:repo.admin@scoap3.org'}
                   target="_blank"
                   rel="noopener noreferrer"
                 >

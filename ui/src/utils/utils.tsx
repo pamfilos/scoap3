@@ -5,7 +5,7 @@ import { PARTNER_COUNTRIES } from "./data";
 import { Token } from "../../token";
 
 export const BASE_URL =
-  process.env.NEXT_API_BASE_URL || "https://backend.dev.scoap3.org";
+  process.env.NEXT_API_BASE_URL || "https://backend.scoap3.org";
 const SEARCH_URL = "/api/search/article";
 
 export const authToken = Token
