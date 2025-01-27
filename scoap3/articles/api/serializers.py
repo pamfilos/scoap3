@@ -254,3 +254,152 @@ class SearchCSVSerializer(DocumentSerializer):
             "publication_date",
             "_created_at",
         ]
+
+
+class LegacyArticleDocumentSerializer(serializers.Serializer):
+    metadata = serializers.SerializerMethodField()
+    updated = serializers.SerializerMethodField()
+    id = serializers.SerializerMethodField()
+    created = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Article
+        fields = ["id", "metadata", "updated", "created"]
+
+    def get_id(self, obj):
+        return obj.id
+
+    def get_metadata(self, obj):
+        return {
+            "_files": [
+                {
+                    "filetype": entry.filetype,
+                    "size": entry.file.size,
+                    "key": entry.file.name,
+                }
+                for entry in obj.related_files
+            ],
+            "abstracts": [
+                {
+                    "source": "".join(
+                        [entry.publisher.name for entry in obj.publication_info]
+                    ),
+                    "value": obj.abstract,
+                }
+            ],
+            "arxiv_eprints": [
+                {
+                    "categories": {
+                        entry.category for entry in obj.article_arxiv_category
+                    },
+                    "value": {
+                        entry.identifier_value for entry in obj.article_identifiers
+                    },
+                }
+            ],
+            "authors": [
+                {
+                    "affiliations": [
+                        {
+                            "country": affiliation.country.name
+                            if affiliation.country
+                            else None,
+                            "organization": affiliation.organization,
+                            "value": affiliation.value,
+                            **(
+                                {
+                                    "ror": affiliation.institutionidentifier_set.filter(
+                                        identifier_type=InstitutionIdentifierType.ROR
+                                    )
+                                    .values_list("identifier_value", flat=True)
+                                    .first(),
+                                }
+                                if affiliation.institutionidentifier_set.filter(
+                                    identifier_type=InstitutionIdentifierType.ROR
+                                ).exists()
+                                else {}
+                            ),
+                        }
+                        for affiliation in entry.affiliations.all()
+                    ],
+                    "email": entry.email,
+                    "full_name": entry.full_name,
+                    "given_names": entry.first_name,
+                    "surname": entry.last_name,
+                    **(
+                        {
+                            "orcid": entry.identifiers.filter(
+                                identifier_type=AuthorIdentifierType.ORCID
+                            )
+                            .values_list("identifier_value", flat=True)
+                            .first()
+                        }
+                        if entry.identifiers.filter(
+                            identifier_type=AuthorIdentifierType.ORCID
+                        ).exists()
+                        else {}
+                    ),
+                }
+                for entry in obj.authors
+            ],
+            "collections": [
+                {"primary": entry.journal_title} for entry in obj.publication_info
+            ],
+            "control_number": obj.id,
+            "copyright": [
+                {
+                    "statement": entry.statement,
+                    "holder": entry.holder,
+                    "year": entry.year,
+                }
+                for entry in obj.copyright
+            ],
+            "dois": [
+                {"value": entry.identifier_value} for entry in obj.article_identifiers
+            ],
+            "imprints": [
+                {
+                    "date": entry.journal_issue_date,
+                    "publisher": entry.publisher.name,
+                }
+                for entry in obj.publication_info
+            ],
+            "license": [
+                {
+                    "license": entry.name,
+                    "url": entry.url,
+                }
+                for entry in obj.related_licenses
+            ],
+            "page_nr": [
+                int(entry.page_end)
+                for entry in obj.publication_info
+                if entry.page_end.isdigit()
+            ],
+            "publication_info": [
+                {
+                    "artid": entry.artid,
+                    "journal_issue": entry.journal_issue,
+                    "journal_title": entry.journal_title,
+                    "journal_volume": entry.journal_volume,
+                    "page_end": entry.page_end,
+                    "page_start": entry.page_start,
+                    "year": entry.volume_year,
+                }
+                for entry in obj.publication_info
+            ],
+            "record_creation_date": obj._created_at,
+            "titles": [
+                {
+                    "source": entry.publisher.name,
+                    "title": obj.title,
+                }
+                for entry in obj.publication_info
+            ],
+        }
+
+    def get_updated(self, obj):
+        return obj._updated_at
+
+    def get_created(self, obj):
+        return obj._created_at

@@ -28,6 +28,7 @@ from scoap3.articles.api.serializers import (
     ArticleFileSerializer,
     ArticleIdentifierSerializer,
     ArticleSerializer,
+    LegacyArticleDocumentSerializer,
     LegacyArticleSerializer,
     SearchCSVSerializer,
 )
@@ -227,3 +228,8 @@ class ArticleFileViewSet(
     queryset = ArticleFile.objects.all()
     serializer_class = ArticleFileSerializer
     permission_classes = [IsAuthenticatedOrReadOnly]
+
+
+class LegacyArticleDocumentView(ArticleDocumentView):
+    def get_serializer_class(self):
+        return LegacyArticleDocumentSerializer

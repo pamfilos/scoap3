@@ -1,7 +1,7 @@
 from django.conf import settings
 from rest_framework.routers import DefaultRouter, SimpleRouter
 
-from scoap3.articles.api.views import ArticleDocumentView
+from scoap3.articles.api.views import ArticleDocumentView, LegacyArticleDocumentView
 
 if settings.DEBUG:
     router = DefaultRouter()
@@ -11,6 +11,7 @@ else:
 
 # Articles
 router.register("article", ArticleDocumentView, basename="article")
+router.register("records", LegacyArticleDocumentView, basename="records")
 
 app_name = "search"
 urlpatterns = router.urls
