@@ -273,7 +273,6 @@ class LegacyArticleDocumentSerializer(serializers.Serializer):
         return {
             "_files": [
                 {
-                    "filetype": entry.filetype,
                     "size": entry.file.size,
                     "key": entry.file.name,
                 }
