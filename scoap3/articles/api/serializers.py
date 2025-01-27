@@ -271,13 +271,6 @@ class LegacyArticleDocumentSerializer(serializers.Serializer):
 
     def get_metadata(self, obj):
         return {
-            "_files": [
-                {
-                    "size": entry.file.size,
-                    "key": entry.file.name,
-                }
-                for entry in obj.related_files
-            ],
             "abstracts": [
                 {
                     "source": "".join(
