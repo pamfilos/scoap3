@@ -263,135 +263,115 @@ class LegacyArticleDocumentSerializer(serializers.Serializer):
     created = serializers.SerializerMethodField()
 
     class Meta:
-        model = Article
         fields = ["id", "metadata", "updated", "created"]
 
     def get_id(self, obj):
-        return obj.id
+        return obj.get("id")
 
     def get_metadata(self, obj):
         return {
             "abstracts": [
                 {
                     "source": "".join(
-                        [entry.publisher.name for entry in obj.publication_info]
+                        [
+                            entry.get("publisher")
+                            for entry in obj.get("publication_info", [])
+                        ]
                     ),
-                    "value": obj.abstract,
+                    "value": obj.get("abstract"),
                 }
             ],
             "arxiv_eprints": [
                 {
-                    "categories": {
-                        entry.category for entry in obj.article_arxiv_category
-                    },
-                    "value": {
-                        entry.identifier_value for entry in obj.article_identifiers
-                    },
+                    "categories": [
+                        entry.get("category")
+                        for entry in obj.get("article_arxiv_category", [])
+                    ],
+                    "value": [
+                        entry.get("identifier_value")
+                        for entry in obj.get("article_identifiers", [])
+                    ],
                 }
             ],
             "authors": [
                 {
                     "affiliations": [
                         {
-                            "country": affiliation.country.name
-                            if affiliation.country
+                            "country": affiliation.get("country", {}).get("name")
+                            if affiliation.get("country")
                             else None,
-                            "organization": affiliation.organization,
-                            "value": affiliation.value,
-                            **(
-                                {
-                                    "ror": affiliation.institutionidentifier_set.filter(
-                                        identifier_type=InstitutionIdentifierType.ROR
-                                    )
-                                    .values_list("identifier_value", flat=True)
-                                    .first(),
-                                }
-                                if affiliation.institutionidentifier_set.filter(
-                                    identifier_type=InstitutionIdentifierType.ROR
-                                ).exists()
-                                else {}
-                            ),
+                            "organization": affiliation.get("organization"),
+                            "value": affiliation.get("value"),
                         }
-                        for affiliation in entry.affiliations.all()
+                        for affiliation in entry.get("affiliations", [])
                     ],
-                    "email": entry.email,
-                    "full_name": entry.full_name,
-                    "given_names": entry.first_name,
-                    "surname": entry.last_name,
-                    **(
-                        {
-                            "orcid": entry.identifiers.filter(
-                                identifier_type=AuthorIdentifierType.ORCID
-                            )
-                            .values_list("identifier_value", flat=True)
-                            .first()
-                        }
-                        if entry.identifiers.filter(
-                            identifier_type=AuthorIdentifierType.ORCID
-                        ).exists()
-                        else {}
-                    ),
+                    "email": entry.get("email"),
+                    "full_name": entry.get("full_name"),
+                    "given_names": entry.get("first_name"),
+                    "surname": entry.get("last_name"),
                 }
-                for entry in obj.authors
+                for entry in obj.get("authors", [])
             ],
             "collections": [
-                {"primary": entry.journal_title} for entry in obj.publication_info
+                {"primary": entry.get("journal_title")}
+                for entry in obj.get("publication_info", [])
             ],
-            "control_number": obj.id,
+            "control_number": obj.get("id"),
             "copyright": [
                 {
-                    "statement": entry.statement,
-                    "holder": entry.holder,
-                    "year": entry.year,
+                    "statement": entry.get("statement"),
+                    "holder": entry.get("holder"),
+                    "year": entry.get("year"),
                 }
-                for entry in obj.copyright
+                for entry in obj.get("copyright", [])
             ],
             "dois": [
-                {"value": entry.identifier_value} for entry in obj.article_identifiers
+                {"value": entry.get("identifier_value")}
+                for entry in obj.get("article_identifiers", [])
             ],
             "imprints": [
                 {
-                    "date": entry.journal_issue_date,
-                    "publisher": entry.publisher.name,
+                    "date": entry.get("journal_issue_date"),
+                    "publisher": entry.get("publisher"),
                 }
-                for entry in obj.publication_info
+                for entry in obj.get("publication_info", [])
             ],
             "license": [
                 {
-                    "license": entry.name,
-                    "url": entry.url,
+                    "license": entry.get("name"),
+                    "url": entry.get("url"),
                 }
-                for entry in obj.related_licenses
+                for entry in obj.get("related_licenses", [])
             ],
             "page_nr": [
-                int(entry.page_end)
-                for entry in obj.publication_info
-                if entry.page_end.isdigit()
+                int(entry.get("page_end"))
+                for entry in obj.get("publication_info", [])
+                if entry.get("page_end") and entry.get("page_end").isdigit()
             ],
             "publication_info": [
                 {
-                    "artid": entry.artid,
-                    "journal_issue": entry.journal_issue,
-                    "journal_title": entry.journal_title,
-                    "journal_volume": entry.journal_volume,
-                    "page_end": entry.page_end,
-                    "page_start": entry.page_start,
-                    "year": entry.volume_year,
+                    "artid": entry.get("artid"),
+                    "journal_issue": entry.get("journal_issue"),
+                    "journal_title": entry.get("journal_title"),
+                    "journal_volume": entry.get("journal_volume"),
+                    "page_end": entry.get("page_end"),
+                    "page_start": entry.get("page_start"),
+                    "year": entry.get("volume_year"),
                 }
-                for entry in obj.publication_info
+                for entry in obj.get("publication_info", [])
             ],
-            "record_creation_date": obj._created_at,
+            "record_creation_date": obj.get("_created_at"),
             "titles": [
                 {
-                    "source": entry.publisher.name,
-                    "title": obj.title,
+                    "source": entry.get("publisher"),
+                    "title": obj.get("title"),
                 }
-                for entry in obj.publication_info
+                for entry in obj.get("publication_info", [])
             ],
         }
 
     def get_updated(self, obj):
-        return obj._updated_at
+        return obj.get("_updated_at")
 
     def get_created(self, obj):
-        return obj._created_at
+        return obj.get("_created_at")
