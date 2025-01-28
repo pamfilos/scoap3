@@ -230,6 +230,105 @@ class ArticleFileViewSet(
     permission_classes = [IsAuthenticatedOrReadOnly]
 
 
-class LegacyArticleDocumentView(ArticleDocumentView):
+class LegacyArticleDocumentView(BaseDocumentViewSet):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.search = self.search.extra(track_total_hits=True)
+
+    document = ArticleDocument
+    serializer_class = ArticleDocumentSerializer
+    filter_backends = [
+        SearchFilterBackend,
+        FacetedSearchFilterBackend,
+        FilteringFilterBackend,
+        OrderingFilterBackend,
+        DefaultOrderingFilterBackend,
+        SimpleQueryStringSearchFilterBackend,
+        SourceBackend,
+    ]
+    renderer_classes = api_settings.DEFAULT_RENDERER_CLASSES + [ArticleCSVRenderer]
+
+    permission_classes = [IsAuthenticatedOrReadOnly]
+    pagination_class = OSStandardResultsSetPagination
+
+    search_fields = (
+        "title",
+        "id",
+        "doi",
+        "authors.first_name",
+        "authors.last_name",
+        "article_identifiers.identifier_value",
+    )
+
+    ordering_fields = {"publication_date": "publication_date"}
+    ordering = ["-publication_date"]
+
+    filter_fields = {
+        "publication_year": {
+            "field": "publication_date",
+            "lookups": [LOOKUP_FILTER_RANGE, LOOKUP_QUERY_IN, "lte", "gte"],
+        },
+        "journal": {
+            "field": "publication_info.journal_title",
+            "lookups": [
+                LOOKUP_QUERY_IN,
+            ],
+        },
+        "country": "authors.affiliations.country.name",
+        "first_name": "authors.first_name",
+        "last_name": "authors.last_name",
+        "doi": "doi",
+    }
+
+    faceted_search_fields = {
+        "publication_year": {
+            "field": "publication_date",
+            "facet": DateHistogramFacet,
+            "options": {
+                "interval": "year",
+            },
+            "enabled": True,
+        },
+        "journal": {
+            "field": "publication_info.journal_title",
+            "facet": TermsFacet,
+            "enabled": True,
+            "options": {
+                "size": 15,
+                "order": {
+                    "_key": "asc",
+                },
+            },
+        },
+        "country": {
+            "field": "authors.affiliations.country.name",
+            "facet": TermsFacet,
+            "enabled": True,
+            "options": {
+                "size": 300,
+                "order": {
+                    "_key": "asc",
+                },
+            },
+        },
+    }
+
+    def get_queryset(self):
+        get_all = self.request.query_params.get("all", "false").lower() == "true"
+        search = super().get_queryset()
+
+        if get_all and self.request.user.is_staff:
+            search = search.extra(size=10000)
+
+        return search
+
+    def list(self, request, *args, **kwargs):
+        get_all = request.query_params.get("all", "false").lower() == "true"
+
+        if get_all and self.request.user.is_staff:
+            self.pagination_class = None
+
+        return super().list(request, *args, **kwargs)
+
     def get_serializer_class(self):
         return LegacyArticleDocumentSerializer
