@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.urls import path
 from rest_framework.routers import DefaultRouter, SimpleRouter
 
 from scoap3.articles.api.views import (
@@ -6,6 +7,7 @@ from scoap3.articles.api.views import (
     ArticleIdentifierViewSet,
     ArticleViewSet,
     ArticleWorkflowImportView,
+    LegacyArticleDocumentView,
     RecordViewSet,
 )
 from scoap3.authors.api.views import AuthorIdentifierViewSet, AuthorViewSet
@@ -42,7 +44,7 @@ router.register(
 )
 
 # Records
-router.register("records", RecordViewSet, basename="records")
+router.register("records", LegacyArticleDocumentView, basename="records-list")
 
 # Authors
 router.register("author", AuthorViewSet)
@@ -63,4 +65,12 @@ router.register("related-material", RelatedMaterialViewSet)
 
 app_name = "api"
 
-urlpatterns = router.urls
+urlpatterns = [
+    path(
+        "records/<int:pk>/",
+        RecordViewSet.as_view({"get": "retrieve"}),
+        name="records-detail",
+    ),
+]
+
+urlpatterns += router.urls

@@ -71,11 +71,7 @@ class ArticleViewSet(
         )
 
 
-class RecordViewSet(
-    RetrieveModelMixin,
-    ListModelMixin,
-    GenericViewSet,
-):
+class RecordViewSet(RetrieveModelMixin, GenericViewSet):
     serializer_class = LegacyArticleSerializer
     queryset = Article.objects.all()
     permission_classes = [IsSuperUserOrReadOnly]
