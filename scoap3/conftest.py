@@ -4,7 +4,7 @@ from django.core.management import call_command
 from scoap3.misc.models import License
 from scoap3.misc.tests.factories import LicenseFactory
 from scoap3.users.models import User
-from scoap3.users.tests.factories import UserFactory
+from scoap3.users.tests.factories import PartnerUserFactory, UserFactory
 
 
 @pytest.fixture
@@ -22,6 +22,11 @@ def media_storage(settings, tmpdir):
 @pytest.fixture
 def user(db) -> User:
     return UserFactory()
+
+
+@pytest.fixture
+def partner_user(db) -> User:
+    return PartnerUserFactory()
 
 
 @pytest.fixture

@@ -8,7 +8,8 @@ django:
 	poetry run python manage.py runserver 0.0.0.0:8000
 
 run-tests:
-	poetry run pytest
+	poetry run pytest -x
+
 
 webpack:
 	npm run dev

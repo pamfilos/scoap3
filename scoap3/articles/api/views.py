@@ -18,7 +18,6 @@ from rest_framework.mixins import (
     RetrieveModelMixin,
     UpdateModelMixin,
 )
-from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 from rest_framework.settings import api_settings
 from rest_framework.viewsets import GenericViewSet, ViewSet
@@ -34,6 +33,7 @@ from scoap3.articles.api.serializers import (
 )
 from scoap3.articles.documents import ArticleDocument
 from scoap3.articles.models import Article, ArticleFile, ArticleIdentifier
+from scoap3.articles.permissions import IsSuperUserOrReadOnly
 from scoap3.tasks import import_to_scoap3
 from scoap3.utils.pagination import OSStandardResultsSetPagination
 from scoap3.utils.renderer import ArticleCSVRenderer
@@ -49,7 +49,7 @@ class ArticleViewSet(
 ):
     serializer_class = ArticleSerializer
     queryset = Article.objects.all()
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [IsSuperUserOrReadOnly]
 
     def create(self, request, *args, **kwargs):
         data = request.data
@@ -78,11 +78,11 @@ class RecordViewSet(
 ):
     serializer_class = LegacyArticleSerializer
     queryset = Article.objects.all()
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [IsSuperUserOrReadOnly]
 
 
 class ArticleWorkflowImportView(ViewSet):
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [IsSuperUserOrReadOnly]
 
     def create(self, request, *args, **kwargs):
         data = request.data.copy()
@@ -114,7 +114,7 @@ class ArticleDocumentView(BaseDocumentViewSet):
     ]
     renderer_classes = api_settings.DEFAULT_RENDERER_CLASSES + [ArticleCSVRenderer]
 
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [IsSuperUserOrReadOnly]
     pagination_class = OSStandardResultsSetPagination
 
     search_fields = (
@@ -214,7 +214,7 @@ class ArticleIdentifierViewSet(
 ):
     queryset = ArticleIdentifier.objects.all()
     serializer_class = ArticleIdentifierSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [IsSuperUserOrReadOnly]
 
 
 class ArticleFileViewSet(
@@ -227,7 +227,7 @@ class ArticleFileViewSet(
 ):
     queryset = ArticleFile.objects.all()
     serializer_class = ArticleFileSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [IsSuperUserOrReadOnly]
 
 
 class LegacyArticleDocumentView(BaseDocumentViewSet):
@@ -248,7 +248,7 @@ class LegacyArticleDocumentView(BaseDocumentViewSet):
     ]
     renderer_classes = api_settings.DEFAULT_RENDERER_CLASSES
 
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [IsSuperUserOrReadOnly]
     pagination_class = OSStandardResultsSetPagination
 
     search_fields = (
