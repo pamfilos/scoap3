@@ -26,6 +26,7 @@ class ArticleDocument(Document):
     publication_date = fields.DateField()
     first_online_date = fields.DateField()
     abstract = fields.TextField()
+
     related_licenses = fields.NestedField(
         properties={
             "url": fields.TextField(),

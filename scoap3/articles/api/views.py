@@ -246,7 +246,7 @@ class LegacyArticleDocumentView(BaseDocumentViewSet):
         SimpleQueryStringSearchFilterBackend,
         SourceBackend,
     ]
-    renderer_classes = api_settings.DEFAULT_RENDERER_CLASSES + [ArticleCSVRenderer]
+    renderer_classes = api_settings.DEFAULT_RENDERER_CLASSES
 
     permission_classes = [IsAuthenticatedOrReadOnly]
     pagination_class = OSStandardResultsSetPagination
@@ -328,7 +328,24 @@ class LegacyArticleDocumentView(BaseDocumentViewSet):
         if get_all and self.request.user.is_staff:
             self.pagination_class = None
 
-        return super().list(request, *args, **kwargs)
+        queryset = self.filter_queryset(self.get_queryset())
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            paginated_response = self.get_paginated_response(serializer.data).data
+
+            return Response(
+                {
+                    "count": paginated_response["count"],
+                    "next": paginated_response["next"],
+                    "previous": paginated_response["previous"],
+                    "hits": {"hits": paginated_response["results"]},
+                }
+            )
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response({"hits": {"hits": serializer.data}})
 
     def get_serializer_class(self):
         return LegacyArticleDocumentSerializer

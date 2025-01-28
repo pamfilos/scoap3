@@ -1,3 +1,4 @@
+import os
 from datetime import datetime
 
 from django_elasticsearch_dsl_drf.serializers import DocumentSerializer
@@ -268,8 +269,27 @@ class LegacyArticleDocumentSerializer(serializers.Serializer):
     def get_id(self, obj):
         return obj.get("id")
 
+    @staticmethod
+    def _get_files(_file):
+        try:
+            filename = os.path.basename(_file)
+            name, extension = os.path.splitext(filename)
+            return {
+                "file": _file,
+                "key": name,
+                "filetype": extension.replace(".", ""),
+            }
+        except Exception:
+            return {
+                "file": _file,
+            }
+
     def get_metadata(self, obj):
+        data = obj.to_dict()
         return {
+            "_files": [
+                self._get_files(entry.get("file", "")) for entry in obj.related_files
+            ],
             "abstracts": [
                 {
                     "source": "".join(
@@ -310,13 +330,13 @@ class LegacyArticleDocumentSerializer(serializers.Serializer):
                     "given_names": entry.get("first_name"),
                     "surname": entry.get("last_name"),
                 }
-                for entry in obj.get("authors", [])
+                for entry in data.get("authors", [])
             ],
             "collections": [
                 {"primary": entry.get("journal_title")}
                 for entry in obj.get("publication_info", [])
             ],
-            "control_number": obj.get("id"),
+            "control_number": data.get("id"),
             "copyright": [
                 {
                     "statement": entry.get("statement"),
@@ -327,7 +347,7 @@ class LegacyArticleDocumentSerializer(serializers.Serializer):
             ],
             "dois": [
                 {"value": entry.get("identifier_value")}
-                for entry in obj.get("article_identifiers", [])
+                for entry in data.get("article_identifiers", [])
             ],
             "imprints": [
                 {
