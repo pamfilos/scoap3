@@ -14,7 +14,7 @@ const Footer = () => {
           <div className="footer-box flex-1">
             {renderFooterLink("https://scoap3.org/", "SCOAP3 website")} |{" "}
             {renderFooterLink("https://scoap3.org/scoap3-repository/", "About the repository")} |{" "}
-            {renderFooterLink("https://scoap3.org/scoap3-repository/repository-help-2/", "Search help")}
+            {renderFooterLink("#", "Search help")}
           </div>
           <div className="footer-box text-center">
             Articles in the SCOAP3 repository are released under a{" "}
