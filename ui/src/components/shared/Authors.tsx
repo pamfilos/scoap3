@@ -39,9 +39,13 @@ const Authors: React.FC<AuthorsProps> = ({
     return fullName;
   };
 
+  const removeRORLinks = (html: string) => {
+    return html.replace(/<a href="https:\/\/ror.org\/[^"]+"[^>]*>([^<]+)<\/a>/g, "$1");
+  };
+
   const formatAffiliations = (affiliations: Affiliation[]) => {
     return affiliations
-      ?.map((aff) => aff?.value)
+      ?.map((aff) => aff?.value ? removeRORLinks(aff.value) : null)
       ?.filter(Boolean)
       ?.join(", ");
   };
