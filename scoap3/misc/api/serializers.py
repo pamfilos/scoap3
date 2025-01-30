@@ -27,7 +27,12 @@ class AffiliationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Affiliation
-        fields = "__all__"
+        fields = [
+            "ror",
+            "value",
+            "organization",
+            "country",
+        ]
 
     def get_ror(self, obj):
         if obj.institutionidentifier_set.filter(
@@ -47,7 +52,11 @@ class AffiliationSerializer(serializers.ModelSerializer):
 class InstitutionIdentifierSerializer(serializers.ModelSerializer):
     class Meta:
         model = InstitutionIdentifier
-        fields = "__all__"
+        fields = [
+            "identifier_type",
+            "identifier_value",
+            "affiliation_id",
+        ]
 
 
 class PublisherSerializer(serializers.ModelSerializer):
@@ -63,7 +72,7 @@ class PublicationInfoSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = PublicationInfo
-        fields = "__all__"
+        exclude = ["id", "article_id"]
 
     def get_publisher(self, obj):
         return obj.publisher.name
@@ -72,7 +81,7 @@ class PublicationInfoSerializer(serializers.ModelSerializer):
 class LicenseSerializer(serializers.ModelSerializer):
     class Meta:
         model = License
-        fields = "__all__"
+        exclude = ["id"]
 
 
 class CopyrightSerializer(serializers.ModelSerializer):
@@ -84,22 +93,22 @@ class CopyrightSerializer(serializers.ModelSerializer):
 class ArticleArxivCategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = ArticleArxivCategory
-        fields = "__all__"
+        exclude = ["id"]
 
 
 class ExperimentalCollaborationSerializer(serializers.ModelSerializer):
     class Meta:
         model = ExperimentalCollaboration
-        fields = "__all__"
+        exclude = ["id"]
 
 
 class FunderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Funder
-        fields = "__all__"
+        exclude = ["id"]
 
 
 class RelatedMaterialSerializer(serializers.ModelSerializer):
     class Meta:
         model = RelatedMaterial
-        fields = "__all__"
+        exclude = ["id"]

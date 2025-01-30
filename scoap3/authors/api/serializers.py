@@ -16,7 +16,7 @@ class AuthorSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Author
-        fields = "__all__"
+        exclude = ["id", "author_order"]
 
     def get_orcid(self, obj):
         if obj.identifiers.filter(identifier_type=AuthorIdentifierType.ORCID).exists():

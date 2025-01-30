@@ -25,13 +25,17 @@ from scoap3.misc.models import InstitutionIdentifierType
 class ArticleFileSerializer(serializers.ModelSerializer):
     class Meta:
         model = ArticleFile
-        fields = "__all__"
+        exclude = [
+            "id",
+        ]
 
 
 class ArticleIdentifierSerializer(serializers.ModelSerializer):
     class Meta:
         model = ArticleIdentifier
-        fields = "__all__"
+        exclude = [
+            "id",
+        ]
 
 
 class ArticleSerializer(serializers.ModelSerializer):
