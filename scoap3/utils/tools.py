@@ -207,14 +207,16 @@ def parse_xml_from_s3(file_path, publisher):
         xml_content = xml_content.decode("utf8")
 
     root = ET.fromstring(xml_content)
+    authors = []
+    affiliations = []
 
     if publisher in ["APS", "Hindawi"]:
-        authors, affiliation_map = parse_aps_hindawi_xml(root)
+        authors, affiliations = parse_aps_hindawi_xml(root)
 
     elif publisher == "Springer":
-        authors, affiliation_map = parse_springer_xml(root)
+        authors, affiliations = parse_springer_xml(root)
 
-    return authors, affiliation_map
+    return authors, affiliations
 
 
 def parse_aps_hindawi_xml(root):
