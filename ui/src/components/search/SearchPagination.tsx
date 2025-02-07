@@ -26,7 +26,7 @@ const SearchPagination: React.FC<SearchPagination> = ({ count, params }) => {
   return (
     <Pagination
       size="small"
-      pageSize={Number(params?.page_size) || 20}
+      pageSize={Number(params?.page_size) || 10}
       total={count}
       onChange={(page) => onPageChange(page)}
       showSizeChanger={false}
