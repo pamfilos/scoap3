@@ -5,7 +5,9 @@ import os
 import re
 
 import country_converter as coco
+import requests
 from django.core.exceptions import MultipleObjectsReturned, ValidationError
+from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage, storages
 from django.core.validators import URLValidator
 from elasticsearch import ConnectionError, ConnectionTimeout, Elasticsearch
@@ -147,7 +149,7 @@ def _create_article(data):
     return article
 
 
-def _create_article_file(data, article):
+def _create_article_file(data, article, copy_files=False):
     for file in data.get("_files", []):
         article_id = article.id
         filename = file.get("key")
@@ -164,6 +166,8 @@ def _create_article_file(data, article):
             "filetype": filetype,
         }
         ArticleFile.objects.get_or_create(**article_file_data)
+        if copy_files:
+            construct_legacy_filepath(article_id, file)
 
     for file in data.get("files", {}):
         article_id = article.id
@@ -387,10 +391,10 @@ def get_articles_by_doi(dois):
     return articles
 
 
-def import_to_scoap3(data, migrate_files):
+def import_to_scoap3(data, migrate_files, copy_files=False):
     article = _create_article(data)
     if migrate_files:
-        _create_article_file(data, article)
+        _create_article_file(data, article, copy_files)
     _create_article_identifier(data, article)
     _create_copyright(data, article)
     _create_article_arxiv_category(data, article)
@@ -431,6 +435,35 @@ def upload_index_range(es_settings, search_index, doc_ids, folder_name):
         except Exception as e:
             logger.error(f"upload_index_range::error processing document: {e}")
             continue
+
+
+def fetch_file_and_save_to_s3(url, s3_path):
+    try:
+        response = requests.get(url, stream=True)
+        response.raise_for_status()  # Raise error for HTTP status codes >= 400
+
+        file_content = ContentFile(response.content)
+
+        s3_file = default_storage.save(s3_path, file_content)
+
+        s3_url = default_storage.url(s3_file)
+
+        print(f"File successfully saved to {s3_url}")
+        return s3_url
+    except requests.exceptions.RequestException as e:
+        print(f"Failed to fetch file from URL: {e}")
+        return None
+    except Exception as e:
+        print(f"Failed to save file to S3: {e}")
+        return None
+
+
+def construct_legacy_filepath(article_id, f):
+    bucket_id = f.get("bucket")
+    file_key = f.get("key")
+    file_url = f"https://repo.scoap3.org/api/files/{bucket_id}/{file_key}"
+    s3path = f"files/{article_id}/{file_key}"
+    fetch_file_and_save_to_s3(file_url, s3path)
 
 
 @celery_app.task(acks_late=True)
